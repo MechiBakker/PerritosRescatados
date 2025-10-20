@@ -28,7 +28,7 @@ function Header() {
           <img
             src="/img/Logo1.jpg"
             alt="Perritos Rescatados"
-            className="h-10 w-auto drop-shadow rounded-full"
+            className="h-10 w-auto drop-shadow"
             loading="lazy"
             decoding="async"
             onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/40x40/38629F/FFFFFF?text=PR"; }}
@@ -209,7 +209,6 @@ function Hero() {
 
 function CarouselPets() {
   const trackRef = useRef(null);
-
   const scrollByCard = (dir) => {
     const el = trackRef.current;
     if (!el) return;
@@ -220,7 +219,6 @@ function CarouselPets() {
 
   return (
     <div className="relative mt-6">
-      {/* Flecha izquierda */}
       <button
         type="button"
         className="absolute left-1 top-1/2 -translate-y-1/2 grid place-items-center w-9 h-9 rounded-full bg-white shadow hover:shadow-md border text-[#38629F] z-10"
@@ -230,12 +228,10 @@ function CarouselPets() {
         «
       </button>
 
-      {/* Contenedor del carrusel */}
       <div
         ref={trackRef}
         className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory px-1 scrollbar-hide relative"
         role="region"
-        aria-label="Animales en adopción"
       >
         {PETS.map((p) => (
           <article
@@ -247,10 +243,11 @@ function CarouselPets() {
               src={p.img}
               alt={p.name}
               className="w-full h-48 object-cover rounded-t-2xl"
-              loading="lazy"
             />
             <div className="p-4">
-              <h3 className="text-[#38629F] font-semibold text-lg">{p.name}</h3>
+              <h3 className="text-[#38629F] font-semibold text-lg">
+                {p.name}
+              </h3>
               <p className="text-slate-600 text-sm mt-1">{p.desc}</p>
               <a
                 href={p.link}
@@ -263,12 +260,9 @@ function CarouselPets() {
             </div>
           </article>
         ))}
-
-        {/* Gradiente a la derecha (indica que hay más) */}
         <div className="pointer-events-none absolute right-0 top-0 h-full w-12 bg-gradient-to-l from-white to-transparent" />
       </div>
 
-      {/* Flecha derecha */}
       <button
         type="button"
         className="absolute right-1 top-1/2 -translate-y-1/2 grid place-items-center w-9 h-9 rounded-full bg-white shadow hover:shadow-md border text-[#38629F] z-10"
@@ -277,11 +271,6 @@ function CarouselPets() {
       >
         »
       </button>
-
-      {/* Hint en mobile */}
-      <p className="text-center text-sm text-slate-500 mt-3 lg:hidden">
-        Deslizá para ver más →
-      </p>
     </div>
   );
 }
@@ -451,7 +440,7 @@ function Footer() {
           <img
             src="/img/Logo2.jpg"
             alt="Perritos Rescatados"
-            className="h-14 w-auto rounded-full"
+            className="h-14 w-auto"
             loading="lazy"
             onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/56x56/EA4E4E/FFFFFF?text=PR"; }}
           />
