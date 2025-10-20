@@ -276,61 +276,76 @@ function CarouselPets() {
 }
 
 function Adopciones() {
-  return (
-    <section id="adopciones" className="py-16 bg-white">
-      <div className="max-w-[1100px] mx-auto px-4">
-        <h2 className="text-2xl md:text-3xl font-semibold text-[#38629F]">
-          Adopciones
-        </h2>
-        <br></br>
-        <p className="text-slate-600 mt-2">
-          Adoptar es un acto de amor. Es por eso que antes de decidir hacerlo, evalues distintos factores que puedan condicionar esta decición:
-        </p>
+  return (
+    <section id="adopciones" className="py-16 bg-white">
+      <div className="max-w-[1100px] mx-auto px-4">
+        <h2 className="text-2xl md:text-3xl font-semibold text-[#38629F]">
+          Adopciones
+        </h2>
+        <br />
 
-        <ul className="list-disc pl-5 space-y-1 text-slate-700 mt-3">
-          <li>El espacio disponible en tu hogar para brindale.</li>
-          <li>
-            Tiempo para paseos, higiene, juegos y mimos, y cuántas horas pasará
-            solo/a.
-          </li>
-          <li>
-            Costos de alimentación, atención veterinaria y otros cuidados.
-          </li>
-          <li>
-            Convivencia con el resto de la familia: niños, adultos mayores o
-            personas con necesidades especiales.
-          </li>
-          
-        </ul>
+        <p className="text-slate-600 mt-2">
+          Adoptar es un acto de amor. Antes de hacerlo, considerá factores como
+          el espacio disponible en tu hogar, el tiempo para dedicarle, y el
+          compromiso a largo plazo que implica tener un compañero peludo.
+        </p>
 
-        <p className="text-slate-600 mt-3">
-          Cada rescatado viene de situaciones distintas. Es clave brindar
-          seguridad, tener paciencia y estar dispuestos a educarlos y
-          respetarlos en el proceso. La adopción es un compromiso para toda su
-          vida.
-        </p>
-        <br></br>
-        <CarouselPets />
-        <br></br>
-        {/* Usamos el placeholder para que compile */}
-        <InstagramCarousel />
-        <br></br>
+        <ul className="list-disc pl-5 space-y-1 text-slate-700 mt-3">
+          <li>Espacio suficiente en tu hogar para recibirlo cómodamente.</li>
+          <li>
+            Tiempo para paseos, higiene, juegos, mimos y acompañamiento diario.
+          </li>
+          <li>Costos de alimentación, atención veterinaria y otros cuidados.</li>
+          <li>
+            Convivencia con el resto de la familia: niños, adultos mayores o
+            mascotas.
+          </li>
+        </ul>
 
+        <p className="text-slate-600 mt-3">
+          Cada rescatado viene de una historia distinta. Es fundamental brindar
+          paciencia, seguridad y cariño durante su adaptación. 🐾
+        </p>
 
-        <div className="mt-6 flex flex-wrap gap-3">
-          <a
-            href="https://docs.google.com/forms/d/e/1FAIpQLSf-7KHtM4XVTRmee_uYTcW3GlZPY6XmX1rlYN5Q6QrGmFh8-w/viewform"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center px-5 py-3 rounded-full font-semibold text-white bg-[#38629F] hover:brightness-95"
-          >
-            Quiero adoptar
-          </a>
-        </div>
-      </div>
-    </section>
-  );
+        <br />
+
+        {/* Carrusel de mascotas */}
+        <CarouselPets />
+
+        <br />
+
+        {/* Carrusel de Instagram */}
+        <div className="mt-10">
+          <h3 className="text-[#38629F] text-xl font-semibold text-center mb-3">
+            🐾 Últimos posteos en Instagram
+          </h3>
+          <div className="flex justify-center">
+            <iframe
+              src="https://snapwidget.com/embed/YOUR_WIDGET_ID_HERE"
+              className="w-full max-w-[900px] h-[400px] border-none overflow-hidden"
+              allowtransparency="true"
+              title="Feed de Instagram Perritos Rescatados"
+            ></iframe>
+          </div>
+        </div>
+
+        <br />
+
+        <div className="mt-6 flex flex-wrap gap-3 justify-center">
+          <a
+            href="https://docs.google.com/forms/d/e/1FAIpQLSf-7KHtM4XVTRmee_uYTcW3GlZPY6XmX1rlYN5Q6QrGmFh8-w/viewform"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center px-5 py-3 rounded-full font-semibold text-white bg-[#38629F] hover:brightness-95"
+          >
+            Quiero adoptar
+          </a>
+        </div>
+      </div>
+    </section>
+  );
 }
+
 
 function Transitos() {
   return (
