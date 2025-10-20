@@ -1,89 +1,57 @@
-import { useEffect, useRef } from "react";
+import React, { useEffect, useState } from "react";
 
-export default function InstagramCarousel() {
-  const trackRef = useRef(null);
+function InstagramCarousel() {
+  const [posts, setPosts] = useState([]);
 
-  // Función para scrollear entre tarjetas
-  const scrollByCard = (dir) => {
-    const el = trackRef.current;
-    if (!el) return;
-    const card = el.querySelector("[data-card]");
-    const delta = card ? card.getBoundingClientRect().width + 16 : 320;
-    el.scrollBy({ left: dir * delta, behavior: "smooth" });
-  };
-
-  // 🔹 Lista de links de Instagram (reemplazá con tus posts)
-  const posts = [
-    "https://www.instagram.com/p/DOCLLaiEUj3/",
-    "https://www.instagram.com/p/DOBxaKbDdC4/",
-    "https://www.instagram.com/p/DN-5xASDZO2/",
-    "https://www.instagram.com/p/DN8cOCtDXgq/",
-    "https://www.instagram.com/p/DNy1f4j2jBU/",
-    "https://www.instagram.com/p/DNo0yjtt-rd/",
-    "https://www.instagram.com/p/DNnjHSYNIkp/",
-    "https://www.instagram.com/p/DNUTNhNsv2e/",
-    "https://www.instagram.com/p/DNivaNHx18F/"
-  ];
-
-  // Cargar el script de Instagram cada vez que cambia la lista
   useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://www.instagram.com/embed.js";
-    script.async = true;
-    document.body.appendChild(script);
-
-    return () => {
-      document.body.removeChild(script);
+    const fetchInstagram = async () => {
+      try {
+        const res = await fetch(
+          `https://graph.instagram.com/me/media?fields=id,caption,media_url,permalink&access_token=TU_ACCESS_TOKEN`
+        );
+        const data = await res.json();
+        setPosts(data.data || []);
+      } catch (err) {
+        console.error("Error al cargar Instagram:", err);
+      }
     };
-  }, [posts]);
+    fetchInstagram();
+  }, []);
 
   return (
-    <div className="relative mt-6">
-      {/* Flecha izquierda */}
-      <button
-        type="button"
-        className="absolute left-1 top-1/2 -translate-y-1/2 grid place-items-center w-9 h-9 rounded-full bg-white shadow hover:shadow-md border text-[#38629F] z-10"
-        aria-label="Anterior"
-        onClick={() => scrollByCard(-1)}
-      >
-        «
-      </button>
+    <div className="mt-10">
+      <h3 className="text-[#38629F] text-xl font-semibold text-center mb-3">
+        🐾 Últimos posteos en Instagram
+      </h3>
 
-      {/* Contenedor del carrusel */}
-      <div
-        ref={trackRef}
-        className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory px-1 scrollbar-hide relative"
-        role="region"
-        aria-label="Posteos de Instagram"
-      >
-        {posts.map((url, i) => (
-          <div
-            key={i}
-            data-card
-            className="min-w-[320px] max-w-[360px] snap-start bg-white rounded-2xl shadow hover:shadow-lg transition-shadow p-2"
-          >
-            <blockquote
-              className="instagram-media w-full"
-              data-instgrm-permalink={url}
-              data-instgrm-version="14"
-              style={{ background: "#fff", borderRadius: "1rem" }}
-            ></blockquote>
-          </div>
-        ))}
-
-        {/* Gradiente a la derecha */}
-        <div className="pointer-events-none absolute right-0 top-0 h-full w-12 bg-gradient-to-l from-white to-transparent" />
+      <div className="flex gap-4 overflow-x-auto scroll-smooth px-1 scrollbar-hide">
+        {posts.length > 0 ? (
+          posts.map((p) => (
+            <a
+              key={p.id}
+              href={p.permalink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="min-w-[260px] bg-white rounded-2xl shadow hover:shadow-lg transition-shadow"
+            >
+              <img
+                src={p.media_url}
+                alt={p.caption?.slice(0, 50)}
+                className="w-full h-64 object-cover rounded-t-2xl"
+              />
+              <p className="p-2 text-sm text-slate-600">
+                {p.caption?.slice(0, 80)}...
+              </p>
+            </a>
+          ))
+        ) : (
+          <p className="text-center text-slate-500 w-full">
+            Cargando publicaciones...
+          </p>
+        )}
       </div>
-
-      {/* Flecha derecha */}
-      <button
-        type="button"
-        className="absolute right-1 top-1/2 -translate-y-1/2 grid place-items-center w-9 h-9 rounded-full bg-white shadow hover:shadow-md border text-[#38629F] z-10"
-        aria-label="Siguiente"
-        onClick={() => scrollByCard(1)}
-      >
-        »
-      </button>
     </div>
   );
 }
+
+export default InstagramCarousel;
