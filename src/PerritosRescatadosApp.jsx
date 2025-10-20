@@ -119,176 +119,172 @@ function Header() {
 
 /* ================= DATA ================= */
 const PETS = [
-  {
-    id: "loli",
-    name: "Loli (adulta)",
-    desc: "Tamaño pequeño. Dulce y compañera.",
-    img: "/img/adopcion-1.jpg", // Usamos ruta local para consistencia
-    link: "https://www.instagram.com/p/DNo0yjtt-rd/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
-  },
-  {
-    id: "luna",
-    name: "Luna (adulta)",
-    desc: "Esterilizada. Tranquila y cariñosa.",
-    img: "/img/adopcion-2.jpg",
-    link: "https://www.instagram.com/perritosrescatados/",
-  },
-  {
-    id: "milo",
-    name: "Milo (joven)",
-    desc: "Cariñoso, convive con gatos.",
-    img: "/img/adopcion-3.jpg",
-    link: "https://www.instagram.com/perritosrescatados/",
-  },
-  {
-    id: "pipa",
-    name: "Pipa (cachorra)",
-    desc: "Energética y muy dulce.",
-    img: "/img/adopcion-4.jpg",
-    link: "https://www.instagram.com/perritosrescatados/",
-  },
+  {
+    id: "loli",
+    name: "Loli (adulta)",
+    desc: "Tamaño pequeño. Dulce y compañera.",
+    img: "https://www.instagram.com/p/DNo0yjtt-rd/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
+    link: "https://www.instagram.com/p/DNo0yjtt-rd/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
+  },
+  {
+    id: "luna",
+    name: "Luna (adulta)",
+    desc: "Esterilizada. Tranquila y cariñosa.",
+    img: "/img/adopcion-2.jpg",
+    link: "https://www.instagram.com/perritosrescatados/",
+  },
+  {
+    id: "milo",
+    name: "Milo (joven)",
+    desc: "Cariñoso, convive con gatos.",
+    img: "/img/adopcion-3.jpg",
+    link: "https://www.instagram.com/perritosrescatados/",
+  },
+  {
+    id: "pipa",
+    name: "Pipa (cachorra)",
+    desc: "Energética y muy dulce.",
+    img: "/img/adopcion-4.jpg",
+    link: "https://www.instagram.com/perritosrescatados/",
+  },
 ];
 
 const COLLAGE = [
-  "/img/013.jpeg",
-  "/img/008.jpeg",
-  "/img/001.jpeg",
-  "/img/018.jpeg",
-  "/img/002.jpeg",
-  "/img/019.jpeg",
-  "/img/024.jpeg",
-  "/img/033.jpeg",
-  "/img/030.jpeg",
+  "/img/013.jpeg",
+  "/img/008.jpeg",
+  "/img/001.jpeg",
+  "/img/018.jpeg",
+  "/img/002.jpeg",
+  "/img/019.jpeg",
+  "/img/024.jpeg",
+  "/img/033.jpeg",
+  "/img/030.jpeg",
 ];
 
 function useYear() {
-  return useMemo(() => new Date().getFullYear(), []);
+  return useMemo(() => new Date().getFullYear(), []);
 }
 
 /* ================= SECTIONS ================= */
 function Hero() {
-  return (
-    <section id="quienes-somos" className="py-16 bg-[#F7E9DC]">
-      <div className="max-w-[1100px] mx-auto px-4 grid md:grid-cols-2 gap-8 items-center">
-        <div className="order-2 md:order-1">
-          <h1 className="font-semibold text-3xl md:text-4xl text-[#38629F] mb-4">
-            ¿Quiénes somos?
-          </h1>
-          <br></br>
-          <p className="text-slate-600 leading-relaxed mb-3">
-            ¡Bienvenidos! Somos un grupo de rescatistas de La Plata, Berisso y
-            Ensenada que unimos fuerzas en 2023 bajo el nombre de Perritos
-            Rescatados.
-          </p>
-          <p className="text-slate-600 leading-relaxed mb-3">
-            Nos dedicamos a dar una segunda (o tercera) oportunidad a perros y
-            gatos que han sido abandonados, viven en la calle o han sufrido
-            maltrato. No tenemos un refugio físico: gracias al trabajo
-            colaborativo, les brindamos tránsito en hogares temporales hasta
-            encontrar a la familia ideal para cada uno.
-          </p>
-          <p className="text-slate-600 leading-relaxed">
-            Con donaciones, rifas y membresías, cubrimos atención veterinaria,
-            alimento y cuidados hasta su recuperación. Luego abrimos el proceso
-            de adopción para encontrarles un hogar definitivo.
-          </p>
-        </div>
-        <div className="order-1 md:order-2">
-          <img
-            src="/img/LogoTrans1.png"
-            alt="Logo Perritos Rescatados"
-            className="w-56 md:w-72 mx-auto"
-            loading="lazy"
-            decoding="async"
-            onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/288x288/F7E9DC/38629F?text=PR+Logo"; }}
-          />
-        </div>
-        
-      </div>
-    </section>
-  );
+  return (
+    <section id="quienes-somos" className="py-16 bg-[#F7E9DC]">
+      <div className="max-w-[1100px] mx-auto px-4 grid md:grid-cols-2 gap-8 items-center">
+        <div className="order-2 md:order-1">
+          <h1 className="font-semibold text-3xl md:text-4xl text-[#38629F] mb-4">
+            ¿Quiénes somos?
+          </h1>
+          <br></br>
+          <p className="text-slate-600 leading-relaxed mb-3">
+            ¡Bienvenidos! Somos un grupo de rescatistas de La Plata, Berisso y
+            Ensenada que unimos fuerzas en 2023 bajo el nombre de Perritos
+            Rescatados.
+          </p>
+          <p className="text-slate-600 leading-relaxed mb-3">
+            Nos dedicamos a dar una segunda (o tercera) oportunidad a perros y
+            gatos que han sido abandonados, viven en la calle o han sufrido
+            maltrato. No tenemos un refugio físico: gracias al trabajo
+            colaborativo, les brindamos tránsito en hogares temporales hasta
+            encontrar a la familia ideal para cada uno.
+          </p>
+          <p className="text-slate-600 leading-relaxed">
+            Con donaciones, rifas y membresías, cubrimos atención veterinaria,
+            alimento y cuidados hasta su recuperación. Luego abrimos el proceso
+            de adopción para encontrarles un hogar definitivo.
+          </p>
+        </div>
+        <div className="order-1 md:order-2">
+          <img
+            src="/img/LogoTrans1.png"
+            alt="Logo Perritos Rescatados"
+            className="w-56 md:w-72 mx-auto"
+            loading="lazy"
+            decoding="async"
+          />
+        </div>
+      </div>
+    </section>
+  );
 }
 
 function CarouselPets() {
-  const trackRef = useRef(null);
+  const trackRef = useRef(null);
 
-  const scrollByCard = (dir) => {
-    const el = trackRef.current;
-    if (!el) return;
-    const card = el.querySelector("[data-card]");
-    const delta = card ? card.getBoundingClientRect().width + 16 : 320;
-    el.scrollBy({ left: dir * delta, behavior: "smooth" });
-  };
+  const scrollByCard = (dir) => {
+    const el = trackRef.current;
+    if (!el) return;
+    const card = el.querySelector("[data-card]");
+    const delta = card ? card.getBoundingClientRect().width + 16 : 320;
+    el.scrollBy({ left: dir * delta, behavior: "smooth" });
+  };
 
-  return (
-    <div className="relative mt-6">
-      {/* Flecha izquierda */}
-      <button
-        type="button"
-        className="absolute left-1 top-1/2 -translate-y-1/2 grid place-items-center w-9 h-9 rounded-full bg-white shadow hover:shadow-md border text-[#38629F] z-10"
-        aria-label="Anterior"
-        onClick={() => scrollByCard(-1)}
-      >
-        «
-      </button>
+  return (
+    <div className="relative mt-6">
+      {/* Flecha izquierda */}
+      <button
+        type="button"
+        className="absolute left-1 top-1/2 -translate-y-1/2 grid place-items-center w-9 h-9 rounded-full bg-white shadow hover:shadow-md border text-[#38629F] z-10"
+        aria-label="Anterior"
+        onClick={() => scrollByCard(-1)}
+      >
+        «
+      </button>
 
-      {/* Contenedor del carrusel */}
-      <div
-        ref={trackRef}
-        className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory px-1 scrollbar-hide relative"
-        role="region"
-        aria-label="Animales en adopción"
-      >
-        {PETS.map((p) => (
-          <article
-            key={p.id}
-            data-card
-            className="min-w-[260px] max-w-[280px] snap-start bg-white rounded-2xl shadow hover:shadow-lg transition-shadow"
-          >
-            <img
-              src={p.img}
-              alt={p.name}
-              className="w-full h-48 object-cover rounded-t-2xl"
-              loading="lazy"
-              onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/280x192/D9E3F1/38629F?text=Foto"; }}
-            />
-            <div className="p-4">
-              <h3 className="text-[#38629F] font-semibold text-lg">{p.name}</h3>
-              <p className="text-slate-600 text-sm mt-1">{p.desc}</p>
-              <a
-                href={p.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex mt-3 items-center justify-center px-3 py-2 rounded-full text-white bg-[#38629F] hover:brightness-95 text-sm"
-              >
-                Ver en Instagram
-              </a>
-            </div>
-          </article>
-        ))}
+      {/* Contenedor del carrusel */}
+      <div
+        ref={trackRef}
+        className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory px-1 scrollbar-hide relative"
+        role="region"
+        aria-label="Animales en adopción"
+      >
+        {PETS.map((p) => (
+          <article
+            key={p.id}
+            data-card
+            className="min-w-[260px] max-w-[280px] snap-start bg-white rounded-2xl shadow hover:shadow-lg transition-shadow"
+          >
+            <img
+              src={p.img}
+              alt={p.name}
+              className="w-full h-48 object-cover rounded-t-2xl"
+              loading="lazy"
+            />
+            <div className="p-4">
+              <h3 className="text-[#38629F] font-semibold text-lg">{p.name}</h3>
+              <p className="text-slate-600 text-sm mt-1">{p.desc}</p>
+              <a
+                href={p.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex mt-3 items-center justify-center px-3 py-2 rounded-full text-white bg-[#38629F] hover:brightness-95 text-sm"
+              >
+                Ver en Instagram
+              </a>
+            </div>
+          </article>
+        ))}
 
-        {/* Gradiente a la derecha (indica que hay más) */}
-        <div className="pointer-events-none absolute right-0 top-0 h-full w-12 bg-gradient-to-l from-white to-transparent" />
-      </div>
+        {/* Gradiente a la derecha (indica que hay más) */}
+        <div className="pointer-events-none absolute right-0 top-0 h-full w-12 bg-gradient-to-l from-white to-transparent" />
+      </div>
 
-      {/* Flecha derecha */}
-      <button
-        type="button"
-        className="absolute right-1 top-1/2 -translate-y-1/2 grid place-items-center w-9 h-9 rounded-full bg-white shadow hover:shadow-md border text-[#38629F] z-10"
-        aria-label="Siguiente"
-        onClick={() => scrollByCard(1)}
-      >
-        »
-      </button>
+      {/* Flecha derecha */}
+      <button
+        type="button"
+        className="absolute right-1 top-1/2 -translate-y-1/2 grid place-items-center w-9 h-9 rounded-full bg-white shadow hover:shadow-md border text-[#38629F] z-10"
+        aria-label="Siguiente"
+        onClick={() => scrollByCard(1)}
+      >
+        »
+      </button>
 
-      {/* Hint en mobile */}
-      <p className="text-center text-sm text-slate-500 mt-3 lg:hidden">
-        Deslizá para ver más →
-      </p>
-    </div>
-  );
+      {/* Hint en mobile */}
+      <p className="text-center text-sm text-slate-500 mt-3 lg:hidden">
+        Deslizá para ver más →
+      </p>
+    </div>
+  );
 }
-
 
 function Adopciones() {
   return (
