@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
+
 // PLACEHOLDER: Componente de Carrusel de Instagram
 function InstagramCarousel() {
   return (
@@ -315,19 +316,12 @@ function Adopciones() {
         <br />
 
         {/* Carrusel de Instagram */}
-        <div className="mt-10">
-          <h3 className="text-[#38629F] text-xl font-semibold text-center mb-3">
-            🐾 Últimos posteos en Instagram
-          </h3>
-          <div className="flex justify-center">
-            <iframe
-              src="https://snapwidget.com/embed/YOUR_WIDGET_ID_HERE"
-              className="w-full max-w-[900px] h-[400px] border-none overflow-hidden"
-              allowtransparency="true"
-              title="Feed de Instagram Perritos Rescatados"
-            ></iframe>
+          <div className="mt-10">
+            <h3 className="text-[#38629F] text-xl font-semibold text-center mb-3">
+              🐾 Últimos posteos en Instagram
+            </h3>
+            <InstagramCarousel />
           </div>
-        </div>
 
         <br />
 
