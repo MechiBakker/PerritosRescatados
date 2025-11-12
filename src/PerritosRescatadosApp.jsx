@@ -1,15 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import InstagramCarousel from "./InstagramCarousel";
 
 
-// PLACEHOLDER: Componente de Carrusel de Instagram
-function InstagramCarousel() {
-  return (
-    <div className="p-4 border-2 border-[#38629F]/20 rounded-xl bg-white shadow-inner text-center text-slate-500">
-      <p className="font-semibold text-[#38629F]">Carrusel de Adopciones de Instagram</p>
-      <p className="text-sm mt-1">Aquí se mostrarían las últimas publicaciones de perros en adopción.</p>
-    </div>
-  );
-}
 
 /* ================= HEADER ================= */
 function Header() {
@@ -118,37 +110,6 @@ function Header() {
   );
 }
 
-/* ================= DATA ================= */
-const PETS = [
-  {
-    id: "loli",
-    name: "Loli (adulta)",
-    desc: "Tamaño pequeño. Dulce y compañera.",
-    img: "https://www.instagram.com/p/DNo0yjtt-rd/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
-    link: "https://www.instagram.com/p/DNo0yjtt-rd/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
-  },
-  {
-    id: "luna",
-    name: "Luna (adulta)",
-    desc: "Esterilizada. Tranquila y cariñosa.",
-    img: "/img/adopcion-2.jpg",
-    link: "https://www.instagram.com/perritosrescatados/",
-  },
-  {
-    id: "milo",
-    name: "Milo (joven)",
-    desc: "Cariñoso, convive con gatos.",
-    img: "/img/adopcion-3.jpg",
-    link: "https://www.instagram.com/perritosrescatados/",
-  },
-  {
-    id: "pipa",
-    name: "Pipa (cachorra)",
-    desc: "Energética y muy dulce.",
-    img: "/img/adopcion-4.jpg",
-    link: "https://www.instagram.com/perritosrescatados/",
-  },
-];
 
 const COLLAGE = [
   "/img/013.jpeg",
@@ -310,8 +271,16 @@ function Adopciones() {
 
         <br />
 
-        {/* Carrusel de mascotas */}
-        <CarouselPets />
+        <div className="mt-6 flex flex-wrap gap-3 justify-center">
+          <a
+            href="https://docs.google.com/forms/d/e/1FAIpQLSf-7KHtM4XVTRmee_uYTcW3GlZPY6XmX1rlYN5Q6QrGmFh8-w/viewform"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center px-5 py-3 rounded-full font-semibold text-white bg-[#38629F] hover:brightness-95"
+          >
+            Quiero adoptar
+          </a>
+        </div>
 
         <br />
 
@@ -324,17 +293,6 @@ function Adopciones() {
           </div>
 
         <br />
-
-        <div className="mt-6 flex flex-wrap gap-3 justify-center">
-          <a
-            href="https://docs.google.com/forms/d/e/1FAIpQLSf-7KHtM4XVTRmee_uYTcW3GlZPY6XmX1rlYN5Q6QrGmFh8-w/viewform"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center px-5 py-3 rounded-full font-semibold text-white bg-[#38629F] hover:brightness-95"
-          >
-            Quiero adoptar
-          </a>
-        </div>
       </div>
     </section>
   );

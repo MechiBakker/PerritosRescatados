@@ -1,39 +1,51 @@
-// ================= INSTAGRAM CAROUSEL (Embeds desde links) =================
-function InstagramCarousel() {
+import React, { useEffect, useRef } from "react";
+
+export default function InstagramCarousel() {
   // Lista de URLs de posts de Instagram
   const POSTS = [
-    "https://www.instagram.com/p/DQfamPpDQrf/?utm_source=ig_web_copy_link&igsh=MWplaHY4ZjloMXphZA==",
-    "https://www.instagram.com/p/DQMczN8jUUl/?utm_source=ig_web_copy_link&igsh=MXR6ZnF3MnpiZXc4cA==",
-    "https://www.instagram.com/p/DPwQfcBDewu/?utm_source=ig_web_copy_link&igsh=MWZiZHZ4OGtrNDhmag==",
-    "https://www.instagram.com/p/DPv66d1DasA/?utm_source=ig_web_copy_link&igsh=bnNzcG9ub21rMm9k",
-    "https://www.instagram.com/p/DPgrS8ijcL6/?utm_source=ig_web_copy_link&igsh=MXU5c25rcnBlaHNjaA==",
-    "https://www.instagram.com/p/DPW-FPfEV-H/?utm_source=ig_web_copy_link&igsh=MWp5cjU1ZDB3b2Rhag==",
-    "https://www.instagram.com/p/DPMuxi8kU6p/?utm_source=ig_web_copy_link&igsh=MjduN2VrZGRrZGE4",
-    "https://www.instagram.com/p/DPMD-yAjTDr/?utm_source=ig_web_copy_link&igsh=d3VhMDEzcW5ubzVh",
-    "https://www.instagram.com/p/DPCwqtEjaFc/?utm_source=ig_web_copy_link&igsh=cGdxMmJ6M3oxOXlr",
-    "https://www.instagram.com/p/DObr1CIESHF/?utm_source=ig_web_copy_link&igsh=c3BnNGpjMnB2Njlq",
+    "https://www.instagram.com/p/DQfamPpDQrf/",
+    "https://www.instagram.com/p/DQMczN8jUUl/",
+    "https://www.instagram.com/p/DPwQfcBDewu/",
+    "https://www.instagram.com/p/DPv66d1DasA/",
+    "https://www.instagram.com/p/DPgrS8ijcL6/",
+    "https://www.instagram.com/p/DPW-FPfEV-H/",
+    "https://www.instagram.com/p/DPMuxi8kU6p/",
+    "https://www.instagram.com/p/DPMD-yAjTDr/",
+    "https://www.instagram.com/p/DPCwqtEjaFc/",
+    "https://www.instagram.com/p/DObr1CIESHF/",
   ];
 
   const trackRef = useRef(null);
 
-  const scrollByCard = (dir) => {
+  const scrollByPage = (dir) => {
     const el = trackRef.current;
     if (!el) return;
     const card = el.querySelector("[data-post]");
-    const delta = card ? card.getBoundingClientRect().width + 16 : 320;
-    el.scrollBy({ left: dir * delta, behavior: "smooth" });
+    const cardWidth = card ? card.getBoundingClientRect().width + 16 : 320;
+    const visibleCards = window.innerWidth >= 1024 ? 3 : window.innerWidth >= 640 ? 2 : 1;
+    el.scrollBy({ left: dir * cardWidth * visibleCards, behavior: "smooth" });
   };
 
   useEffect(() => {
     // Carga el script de Instagram para renderizar los embeds
-    if (!window.instgrm) {
-      const script = document.createElement("script");
-      script.src = "https://www.instagram.com/embed.js";
-      script.async = true;
-      script.onload = () => window.instgrm?.Embeds?.process();
-      document.body.appendChild(script);
-    } else {
-      window.instgrm?.Embeds?.process();
+    const ensureInstagramScript = () => {
+      if (!window.instgrm) {
+        const script = document.createElement("script");
+        script.src = "https://www.instagram.com/embed.js";
+        script.async = true;
+        script.onload = () => window.instgrm?.Embeds?.process();
+        document.body.appendChild(script);
+      } else {
+        window.instgrm?.Embeds?.process();
+      }
+    };
+    ensureInstagramScript();
+  }, []);
+
+  useEffect(() => {
+    // Reprocesa los embeds si cambian los posts
+    if (window.instgrm) {
+      window.instgrm.Embeds.process();
     }
   }, [POSTS]);
 
@@ -49,15 +61,15 @@ function InstagramCarousel() {
   }
 
   return (
-    <div className="relative mt-4">
+    <div className="relative mt-6">
       {/* Botón anterior */}
       <button
         type="button"
-        onClick={() => scrollByCard(-1)}
-        className="absolute left-1 top-1/2 -translate-y-1/2 grid place-items-center w-9 h-9 rounded-full bg-white shadow hover:shadow-md border text-[#38629F] z-10"
+        onClick={() => scrollByPage(-1)}
+        className="absolute left-2 top-1/2 -translate-y-1/2 grid place-items-center w-10 h-10 rounded-full bg-[#38629F] text-white shadow hover:shadow-md z-10"
         aria-label="Anterior"
       >
-        «
+        ‹
       </button>
 
       {/* Contenedor del carrusel */}
@@ -70,34 +82,58 @@ function InstagramCarousel() {
           <div
             key={i}
             data-post
-            className="min-w-[300px] max-w-[350px] snap-start bg-white rounded-2xl shadow hover:shadow-lg transition-shadow overflow-hidden"
+            className="snap-start flex-shrink-0 bg-white rounded-2xl shadow hover:shadow-lg transition-shadow overflow-hidden"
+            style={{
+              width: "calc((100% - 2rem) / 3)", // 3 columnas en escritorio
+              height: "450px",
+            }}
           >
-            <blockquote
-              className="instagram-media"
-              data-instgrm-permalink={url}
-              data-instgrm-version="14"
-              style={{
-                background: "#FFF",
-                border: 0,
-                margin: 0,
-                minWidth: "300px",
-                maxWidth: "350px",
-              }}
-            ></blockquote>
+            <div
+              className="w-full h-full flex items-center justify-center bg-gray-100"
+              style={{ overflow: "hidden" }}
+            >
+              <blockquote
+                className="instagram-media w-full h-full"
+                data-instgrm-permalink={url}
+                data-instgrm-version="14"
+                style={{
+                  border: 0,
+                  margin: 0,
+                  width: "100%",
+                  height: "100%",
+                  background: "#FFF",
+                }}
+              ></blockquote>
+            </div>
           </div>
         ))}
-        <div className="pointer-events-none absolute right-0 top-0 h-full w-12 bg-gradient-to-l from-white to-transparent" />
       </div>
 
       {/* Botón siguiente */}
       <button
         type="button"
-        onClick={() => scrollByCard(1)}
-        className="absolute right-1 top-1/2 -translate-y-1/2 grid place-items-center w-9 h-9 rounded-full bg-white shadow hover:shadow-md border text-[#38629F] z-10"
+        onClick={() => scrollByPage(1)}
+        className="absolute right-2 top-1/2 -translate-y-1/2 grid place-items-center w-10 h-10 rounded-full bg-[#38629F] text-white shadow hover:shadow-md z-10"
         aria-label="Siguiente"
       >
-        »
+        ›
       </button>
+
+      {/* Responsive styles */}
+      <style>
+        {`
+          @media (max-width: 1024px) {
+            [data-post] {
+              width: calc((100% - 1rem) / 2) !important;
+            }
+          }
+          @media (max-width: 640px) {
+            [data-post] {
+              width: 100% !important;
+            }
+          }
+        `}
+      </style>
     </div>
   );
 }
