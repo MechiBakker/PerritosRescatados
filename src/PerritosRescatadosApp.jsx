@@ -62,6 +62,12 @@ function Header() {
           >
             Tránsitos
           </a>
+          <a
+            className="hover:text-[#F7E9DC] transition-colors"
+            href="#tienda"
+            >
+              Tienda
+            </a>
           <a
             className="hover:text-[#F7E9DC] transition-colors"
             href="#colabora"
@@ -97,6 +103,13 @@ function Header() {
           onClick={() => setOpen(false)}
         >
           Tránsitos
+        </a>
+        <a
+          href="#tienda"
+          className="hover:text-[#F7E9DC]"
+          onClick={() => setOpen(false)}
+        >
+          Tienda
         </a>
         <a
           href="#colabora"
@@ -138,8 +151,8 @@ function Hero() {
           </h1>
           <br></br>
           <p className="text-slate-600 leading-relaxed mb-3">
-            ¡Bienvenidos! Somos un grupo de rescatistas de La Plata, Berisso y
-            Ensenada que unimos fuerzas en 2023 bajo el nombre de Perritos
+            ¡Bienvenidos! Somos un grupo de rescatistas de La Plata
+            que unimos fuerzas en 2023 bajo el nombre de Perritos
             Rescatados.
           </p>
           <p className="text-slate-600 leading-relaxed mb-3">
@@ -354,6 +367,64 @@ function Transitos() {
   );
 }
 
+function Tienda() {
+  return (
+    <section id="tienda" className="py-16 bg-[#F7E9DC]">
+      <div className="max-w-[1100px] mx-auto px-4">
+        <h2 className="text-2xl md:text-3xl font-semibold text-[#38629F] mb-6 text-center">
+          🛍️ Tienda solidaria
+        </h2>
+
+        <p className="text-slate-600 text-center mb-10">
+          Todo lo recaudado se destina a la atención veterinaria, alimento y cuidados de nuestros rescatados. 💕
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+          {[
+            { nombre: "Remeras", img: "/public/img/remera.png", precio: "$25.000" },
+            { nombre: "Totebags", img: "/public/img/totebag.png", precio: "$13.000" },
+            { nombre: "Velas", img: "/public/img/vela.png", precio: "$5.000" },
+            { nombre: "Comederos Marote", img: "/public/img/comederos.png", precio: "$3.000 / $4.000" },
+            { nombre: "Frisbee", img: "/public/img/frisbee.png", precio: "$4.000" },
+            { nombre: "Cepillos", img: "/public/img/cepillo.png", precio: "$2.500" },
+          ].map((item, i) => (
+            <article
+              key={i}
+              className="bg-white rounded-2xl shadow hover:shadow-lg transition-shadow overflow-hidden flex flex-col"
+            >
+              <img
+                src={item.img}
+                alt={item.nombre}
+                className="w-full h-81 object-cover"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = `https://placehold.co/300x300/eff4fb/38629F?text=${item.nombre}`;
+                }}
+              />
+              <div className="p-4 text-center">
+                <h3 className="text-[#38629F] font-semibold text-lg">
+                  {item.nombre}
+                </h3>
+                <p className="text-slate-600 font-medium mt-1">{item.precio}</p>
+                <a
+                  href="https://wa.me/5492216155465"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-3 inline-block px-4 py-2 rounded-full text-white bg-[#38629F] hover:brightness-95 text-sm font-semibold"
+                >
+                  Comprar
+                </a>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+
+
 function Colabora() {
   return (
     <section
@@ -367,7 +438,7 @@ function Colabora() {
         <br></br>
         <p className="text-slate-600 mt-2">
               Nuestro trabajo es completamente ad honorem. Perritos Rescatados subsiste gracias a las donaciones y el aporte económico de ustedes.</p>
-        <p className="text-slate-600 mt-2">Si querés donar o susbribirte para colaborar mensualmente:</p>
+        <p className="text-slate-600 mt-2">Si querés donar o suscribirte para colaborar mensualmente:</p>
         <br></br>
 
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
@@ -446,6 +517,15 @@ function Footer() {
             >
               <img src="/img/facebook.png" alt="Facebook" className="h-6 w-6" onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/24x24/EA4E4E/FFFFFF?text=FB"; }}/>
             </a>
+             <a
+              href="https://www.tiktok.com/@perritosrescatados_?_r=1&_t=ZM-91LwOvbMCDr"
+              target="_blank"
+              rel="noopener"
+              aria-label="TikTok"
+              className="hover:opacity-80"
+            >
+              <img src="/img/tiktok.png" alt="Tiktok" className="h-6 w-6" onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/24x24/EA4E4E/FFFFFF?text=FB"; }}/>
+            </a>
           </div>
         </div>
       </div>
@@ -487,7 +567,8 @@ export default function PerritosRescatadosApp() {
         <Hero />
         <Adopciones />
         <Transitos />
-        <Colabora />
+        <Tienda/>        
+        <Colabora />
       </main>
 
       <Footer />
