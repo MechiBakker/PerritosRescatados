@@ -367,7 +367,62 @@ function Transitos() {
   );
 }
 
+import { useRef, useEffect } from "react";
+
 function Tienda() {
+  const trackRef = useRef(null);
+  const autoScrollRef = useRef(null);
+
+  const scrollByCard = (dir) => {
+    const el = trackRef.current;
+    if (!el) return;
+    const card = el.querySelector("[data-card]");
+    const delta = card ? card.getBoundingClientRect().width + 16 : 280;
+    el.scrollBy({ left: dir * delta, behavior: "smooth" });
+  };
+
+  const productos = [
+    { nombre: "Remeras", img: "/img/remera.jpg", precio: "$25.000" },
+    { nombre: "Totebags", img: "/img/totebag.jpg", precio: "$13.000" },
+    { nombre: "Velas", img: "/img/vela.jpg", precio: "$5.000" },
+    { nombre: "Comederos Marote", img: "/img/comederos.jpg", precio: "$3.000 / $4.000" },
+    { nombre: "Frisbees", img: "/img/frisbee.jpg", precio: "$4.000" },
+    { nombre: "Cepillos", img: "/img/cepillo.jpg", precio: "$2.500" },
+  ];
+
+  /* === AUTOPLAY === */
+  useEffect(() => {
+    const el = trackRef.current;
+    if (!el) return;
+
+    const handleUserInteraction = () => {
+      // Detiene autoplay al tocar o arrastrar
+      clearInterval(autoScrollRef.current);
+      autoScrollRef.current = null;
+    };
+
+    el.addEventListener("touchstart", handleUserInteraction);
+    el.addEventListener("mousedown", handleUserInteraction);
+
+    const autoplay = () => {
+      const scrollMax = el.scrollWidth - el.clientWidth;
+      const nearEnd = el.scrollLeft + 10 >= scrollMax;
+      const dir = nearEnd ? -1 : 1;
+      scrollByCard(dir);
+    };
+
+    // Solo se activa en mobile (<768px)
+    if (window.innerWidth < 768) {
+      autoScrollRef.current = setInterval(autoplay, 3000);
+    }
+
+    return () => {
+      clearInterval(autoScrollRef.current);
+      el.removeEventListener("touchstart", handleUserInteraction);
+      el.removeEventListener("mousedown", handleUserInteraction);
+    };
+  }, []);
+
   return (
     <section id="tienda" className="py-16 bg-[#F7E9DC]">
       <div className="max-w-[1100px] mx-auto px-4">
@@ -379,15 +434,65 @@ function Tienda() {
           Todo lo recaudado se destina a la atención veterinaria, alimento y cuidados de nuestros rescatados. 💕
         </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-          {[
-            { nombre: "Remeras", img: "/img/remera.jpg", precio: "$25.000" },
-            { nombre: "Totebags", img: "/img/totebag.jpg", precio: "$13.000" },
-            { nombre: "Velas", img: "/img/vela.jpg", precio: "$5.000" },
-            { nombre: "Comederos Marote", img: "/img/comederos.jpg", precio: "$3.000 / $4.000" },
-            { nombre: "Frisbees", img: "/img/frisbee.jpg", precio: "$4.000" },
-            { nombre: "Cepillos", img: "/img/cepillo.jpg", precio: "$2.500" },
-          ].map((item, i) => (
+        {/* Carrusel en mobile */}
+        <div className="relative md:hidden">
+          <button
+            type="button"
+            onClick={() => scrollByCard(-1)}
+            className="absolute left-1 top-1/2 -translate-y-1/2 bg-white text-[#38629F] w-8 h-8 rounded-full shadow hover:shadow-md z-10"
+          >
+            «
+          </button>
+
+          <div
+            ref={trackRef}
+            className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory scrollbar-hide px-1"
+          >
+            {productos.map((item, i) => (
+              <article
+                key={i}
+                data-card
+                className="min-w-[240px] max-w-[260px] snap-start bg-white rounded-2xl shadow hover:shadow-lg transition-shadow overflow-hidden flex flex-col"
+              >
+                <img
+                  src={item.img}
+                  alt={item.nombre}
+                  className="w-full h-64 object-cover"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = `https://placehold.co/300x300/eff4fb/38629F?text=${item.nombre}`;
+                  }}
+                />
+                <div className="p-4 text-center">
+                  <h3 className="text-[#38629F] font-semibold text-lg">
+                    {item.nombre}
+                  </h3>
+                  <p className="text-slate-600 font-medium mt-1">{item.precio}</p>
+                  <a
+                    href="https://wa.me/5492216155465"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-3 inline-block px-4 py-2 rounded-full text-white bg-[#38629F] hover:brightness-95 text-sm font-semibold"
+                  >
+                    Comprar
+                  </a>
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => scrollByCard(1)}
+            className="absolute right-1 top-1/2 -translate-y-1/2 bg-white text-[#38629F] w-8 h-8 rounded-full shadow hover:shadow-md z-10"
+          >
+            »
+          </button>
+        </div>
+
+        {/* Grilla normal en desktop */}
+        <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {productos.map((item, i) => (
             <article
               key={i}
               className="bg-white rounded-2xl shadow hover:shadow-lg transition-shadow overflow-hidden flex flex-col"
@@ -395,7 +500,7 @@ function Tienda() {
               <img
                 src={item.img}
                 alt={item.nombre}
-                className="w-full h-81 object-cover"
+                className="w-full h-80 object-cover"
                 onError={(e) => {
                   e.target.onerror = null;
                   e.target.src = `https://placehold.co/300x300/eff4fb/38629F?text=${item.nombre}`;
@@ -422,7 +527,6 @@ function Tienda() {
     </section>
   );
 }
-
 
 
 function Colabora() {
