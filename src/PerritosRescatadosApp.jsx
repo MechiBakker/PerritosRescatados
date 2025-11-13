@@ -385,7 +385,7 @@ function Tienda() {
             { nombre: "Totebags", img: "/img/totebag.jpg", precio: "$13.000" },
             { nombre: "Velas", img: "/img/vela.jpg", precio: "$5.000" },
             { nombre: "Comederos Marote", img: "/img/comederos.jpg", precio: "$3.000 / $4.000" },
-            { nombre: "Frisbee", img: "/img/frisbee.jpg", precio: "$4.000" },
+            { nombre: "Frisbees", img: "/img/frisbee.jpg", precio: "$4.000" },
             { nombre: "Cepillos", img: "/img/cepillo.jpg", precio: "$2.500" },
           ].map((item, i) => (
             <article
