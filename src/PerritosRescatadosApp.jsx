@@ -367,8 +367,6 @@ function Transitos() {
   );
 }
 
-import { useRef, useEffect } from "react";
-
 function Tienda() {
   const trackRef = useRef(null);
   const autoScrollRef = useRef(null);
