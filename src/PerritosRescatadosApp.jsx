@@ -381,12 +381,12 @@ function Tienda() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
           {[
-            { nombre: "Remeras", img: "/public/img/remera.png", precio: "$25.000" },
-            { nombre: "Totebags", img: "/public/img/totebag.png", precio: "$13.000" },
-            { nombre: "Velas", img: "/public/img/vela.png", precio: "$5.000" },
-            { nombre: "Comederos Marote", img: "/public/img/comederos.png", precio: "$3.000 / $4.000" },
-            { nombre: "Frisbee", img: "/public/img/frisbee.png", precio: "$4.000" },
-            { nombre: "Cepillos", img: "/public/img/cepillo.png", precio: "$2.500" },
+            { nombre: "Remeras", img: "/public/img/remera.jpg", precio: "$25.000" },
+            { nombre: "Totebags", img: "/public/img/totebag.jpg", precio: "$13.000" },
+            { nombre: "Velas", img: "/public/img/vela.jpg", precio: "$5.000" },
+            { nombre: "Comederos Marote", img: "/public/img/comederos.jpg", precio: "$3.000 / $4.000" },
+            { nombre: "Frisbee", img: "/public/img/frisbee.jpg", precio: "$4.000" },
+            { nombre: "Cepillos", img: "/public/img/cepillo.jpg", precio: "$2.500" },
           ].map((item, i) => (
             <article
               key={i}
