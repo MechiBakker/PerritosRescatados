@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState, createContext, useContext } from "
 // Asegúrate de que las rutas a AdminPanel y Content sean correctas
 import InstagramCarousel from "./InstagramCarousel"; // Asumo que existe
 import AdminPanel from "./AdminPanel";               // Asumo que existe
-import Content from "./Content";                     // Asumo que existe
+import Content from "./components/Content";                     // Asumo que existe
 
 /* ------------------ FIREBASE CLIENT (AUTH) INIT ------------------ */
 import { initializeApp } from "firebase/app";
