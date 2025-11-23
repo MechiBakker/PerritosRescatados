@@ -6,11 +6,40 @@ import InstagramCarousel from "./InstagramCarousel"; // Asumo que este component
 /* ================= SIMULACIÓN DE DATOS DINÁMICOS (Backend) ================= */
 // Función de simulación para cargar datos de adopciones
 const fetchMascotas = () => {
+  // 📌 CAMBIO: 'imgs' es un array de URLs
   return [
-    { id: 1, name: "Max", age: "2 años", desc: "Perro muy juguetón, ideal para familias activas.", img: "/img/perro1.jpg", link: "https://www.instagram.com/p/mascota1/" },
-    { id: 2, name: "Luna", age: "6 meses", desc: "Cachorra tímida, necesita un hogar con mucha paciencia.", img: "/img/perro2.jpg", link: "https://www.instagram.com/p/mascota2/" },
-    { id: 3, name: "Coco", age: "5 años", desc: "Gato tranquilo, busca un lugar para descansar y recibir mimos.", img: "/img/gato1.jpg", link: "https://www.instagram.com/p/mascota3/" },
-    { id: 4, name: "Toby", age: "1 año", desc: "Energético, necesita mucho ejercicio y espacio para correr.", img: "/img/perro3.jpg", link: "https://www.instagram.com/p/mascota4/" },
+    { 
+      id: 1, 
+      name: "Max", 
+      age: "2 años", 
+      desc: "Perro muy juguetón, ideal para familias activas.", 
+      imgs: ["/img/perro1_a.jpg", "/img/perro1_b.jpg", "/img/perro1_c.jpg"], // Múltiples fotos
+      link: "https://www.instagram.com/p/mascota1/" 
+    },
+    { 
+      id: 2, 
+      name: "Luna", 
+      age: "6 meses", 
+      desc: "Cachorra tímida, necesita un hogar con mucha paciencia.", 
+      imgs: ["/img/perro2_a.jpg", "/img/perro2_b.jpg"], 
+      link: "https://www.instagram.com/p/mascota2/" 
+    },
+    { 
+      id: 3, 
+      name: "Coco", 
+      age: "5 años", 
+      desc: "Gato tranquilo, busca un lugar para descansar y recibir mimos.", 
+      imgs: ["/img/gato1_a.jpg"], 
+      link: "https://www.instagram.com/p/mascota3/" 
+    },
+    { 
+      id: 4, 
+      name: "Toby", 
+      age: "1 año", 
+      desc: "Energético, necesita mucho ejercicio y espacio para correr.", 
+      imgs: ["/img/perro3_a.jpg", "/img/perro3_b.jpg"], 
+      link: "https://www.instagram.com/p/mascota4/" 
+    },
   ];
 };
 
@@ -233,7 +262,75 @@ function Hero() {
   );
 }
 
-// 📌 Nuevo componente de Carrusel para Adopciones
+// 📌 Nuevo Componente: Carrusel interno de imágenes
+function PetImageCarousel({ imgs, name }) {
+    const [currentIndex, setCurrentIndex] = useState(0);
+
+    const nextImage = () => {
+        setCurrentIndex((prevIndex) => (prevIndex + 1) % imgs.length);
+    };
+
+    const prevImage = () => {
+        setCurrentIndex((prevIndex) => (prevIndex - 1 + imgs.length) % imgs.length);
+    };
+
+    return (
+        <div className="relative h-64 overflow-hidden rounded-t-2xl">
+            {/* Contenedor de imágenes que se desplaza */}
+            <div 
+                className="flex transition-transform duration-300 h-full"
+                style={{ width: `${imgs.length * 100}%`, transform: `translateX(-${currentIndex * (100 / imgs.length)}%)` }}
+            >
+                {imgs.map((src, index) => (
+                    <img
+                        key={index}
+                        src={src}
+                        alt={`${name} - Foto ${index + 1}`}
+                        className="w-full h-full object-cover flex-shrink-0"
+                        style={{ width: `${100 / imgs.length}%` }}
+                        // Ajuste para simulación: usa un placeholder si la URL es incorrecta
+                        onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/340x256/D9E3F1/38629F?text=Foto"; }}
+                    />
+                ))}
+            </div>
+            
+            {/* Controles de navegación */}
+            {imgs.length > 1 && (
+                <>
+                    {/* Flechas */}
+                    <button 
+                        onClick={prevImage} 
+                        className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 text-white p-1 rounded-full text-xs hover:bg-black/60 transition" 
+                        aria-label="Foto anterior"
+                    >
+                        «
+                    </button>
+                    <button 
+                        onClick={nextImage} 
+                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 text-white p-1 rounded-full text-xs hover:bg-black/60 transition" 
+                        aria-label="Foto siguiente"
+                    >
+                        »
+                    </button>
+                    
+                    {/* Puntos indicadores */}
+                    <div className="absolute bottom-2 left-0 right-0 flex justify-center space-x-1">
+                        {imgs.map((_, index) => (
+                            <button 
+                                key={index}
+                                onClick={() => setCurrentIndex(index)}
+                                className={`w-2 h-2 rounded-full transition-colors ${index === currentIndex ? 'bg-white shadow' : 'bg-gray-400/80'}`}
+                                aria-label={`Ver foto ${index + 1}`}
+                            />
+                        ))}
+                    </div>
+                </>
+            )}
+        </div>
+    );
+}
+
+// 📌 Componente de Carrusel para Adopciones
 function CarouselPetsDynamic({ mascotas }) {
   const trackRef = useRef(null);
   const scrollByCard = (dir) => {
@@ -241,7 +338,7 @@ function CarouselPetsDynamic({ mascotas }) {
     if (!el) return;
     const card = el.querySelector("[data-card]");
     // Calcula el desplazamiento: ancho de la tarjeta + gap (16px)
-    const delta = card ? card.getBoundingClientRect().width + 16 : 320;
+    const delta = card ? card.getBoundingClientRect().width + 16 : 340; // Ajustado a nueva medida
     el.scrollBy({ left: dir * delta, behavior: "smooth" });
   };
 
@@ -269,15 +366,12 @@ function CarouselPetsDynamic({ mascotas }) {
           <article
             key={p.id}
             data-card
-            className="min-w-[260px] max-w-[280px] snap-start bg-white rounded-2xl shadow hover:shadow-lg transition-shadow"
+            // 📌 CAMBIO: Aumento del ancho de la tarjeta
+            className="min-w-[300px] max-w-[340px] snap-start bg-white rounded-2xl shadow hover:shadow-lg transition-shadow"
           >
-            <img
-              src={p.img}
-              alt={p.name}
-              className="w-full h-48 object-cover rounded-t-2xl"
-              // Agregando manejo de error para imágenes dinámicas
-              onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/260x192/D9E3F1/38629F?text=Foto"; }}
-            />
+            {/* 📌 CAMBIO: Uso del nuevo carrusel interno para múltiples imágenes */}
+            <PetImageCarousel imgs={p.imgs} name={p.name} />
+
             <div className="p-4">
               <h3 className="text-[#38629F] font-semibold text-lg">
                 {p.name}
@@ -840,7 +934,7 @@ function AdminPanel({ onLogout }) {
             <div className="grid md:grid-cols-3 gap-6">
                 <div className="bg-white p-6 rounded-xl shadow-md border-t-4 border-[#38629F]">
                     <h2 className="text-xl font-semibold mb-3">Gestión de Adopciones</h2>
-                    <p className="text-sm text-slate-600">Agregar, editar o eliminar mascotas disponibles para adopción.</p>
+                    <p className="text-sm text-slate-600">Agregar, editar o eliminar mascotas disponibles para adopción, incluyendo la subida de múltiples fotos.</p>
                     <button className="mt-4 text-white bg-green-500 px-4 py-2 rounded text-sm hover:bg-green-600">Abrir Panel</button>
                 </div>
                 <div className="bg-white p-6 rounded-xl shadow-md border-t-4 border-[#38629F]">
