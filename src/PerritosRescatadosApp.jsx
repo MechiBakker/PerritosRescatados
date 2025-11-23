@@ -1060,43 +1060,6 @@ function AdminLogin() {
     );
 }
 
-// 📌 Componente de Panel de Administración (Simplificado)
-function AdminPanel() {
-    const { logout } = useAuth(); // Usa el logout real
-    // En una implementación real, aquí se usaría el componente completo de 'admin.jsx'
-
-    return (
-        <div className="max-w-[1100px] mx-auto px-4 py-16 min-h-screen bg-gray-50">
-            <h1 className="text-4xl font-bold text-[#38629F] mb-8">Panel de Administración 🔐</h1>
-            <p className="text-slate-700 mb-6">Gestioná el contenido de la página. El **componente de administración completo** con formularios CRUD está disponible en el archivo **`admin.jsx`**.</p>
-            
-            <div className="grid md:grid-cols-3 gap-6">
-                <div className="bg-white p-6 rounded-xl shadow-md border-t-4 border-[#38629F]">
-                    <h2 className="text-xl font-semibold mb-3">Mascotas (Adopciones)</h2>
-                    <p className="text-sm text-slate-600">Conectado a `/api/pets` (Firestore). Agrega, edita o elimina mascotas para la sección Adopciones.</p>
-                    <button className="mt-4 text-white bg-green-500 px-4 py-2 rounded text-sm hover:bg-green-600" onClick={() => alert("Simulando ir a la gestión de Mascotas")}>Gestionar</button>
-                </div>
-                <div className="bg-white p-6 rounded-xl shadow-md border-t-4 border-[#38629F]">
-                    <h2 className="text-xl font-semibold mb-3">Tienda (Productos)</h2>
-                    <p className="text-sm text-slate-600">Conectado a `/api/products` (Firestore). Administra stock, precios y la URL de Mercado Pago.</p>
-                    <button className="mt-4 text-white bg-green-500 px-4 py-2 rounded text-sm hover:bg-green-600" onClick={() => alert("Simulando ir a la gestión de Productos")}>Gestionar</button>
-                </div>
-                <div className="bg-white p-6 rounded-xl shadow-md border-t-4 border-[#38629F]">
-                    <h2 className="text-xl font-semibold mb-3">Imágenes (Storage)</h2>
-                    <p className="text-sm text-slate-600">Usa el endpoint `/api/upload` para subir imágenes a Firebase Storage y obtener URLs públicas.</p>
-                    <button className="mt-4 text-white bg-green-500 px-4 py-2 rounded text-sm hover:bg-green-600" onClick={() => alert("Simulando ir a la gestión de Subidas")}>Gestionar</button>
-                </div>
-            </div>
-
-            <button
-                onClick={logout}
-                className="mt-10 inline-flex items-center justify-center px-5 py-3 rounded-full font-semibold text-white bg-[#EA4E4E] hover:brightness-95"
-            >
-                Cerrar Sesión
-            </button>
-        </div>
-    );
-}
 
 /* ================= APP PRINCIPAL ================= */
 // Se envuelve la App con el AuthProvider
