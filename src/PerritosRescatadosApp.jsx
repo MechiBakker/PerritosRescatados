@@ -22,7 +22,7 @@ const auth = getAuth(app);
 */
 
 import InstagramCarousel from "./InstagramCarousel";
-import AdminPanel from "./AdminPanel";
+import AdminPanel from "../pages/admin";
 import Login from "./Login";
 import Content from "./Content";
 
