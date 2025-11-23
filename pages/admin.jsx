@@ -1,586 +1,357 @@
 // pages/admin.jsx
-import React, { useEffect, useState, useRef } from "react";
-import { initializeApp } from "firebase/app";
-import {
-  getAuth,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-} from "firebase/auth";
+import React, { useEffect, useState, useRef, useCallback, useContext, createContext } from "react";
+
+// 📌 ATENCIÓN: Debes importar el useAuth hook desde donde lo definiste (e.g., PerritosRescatadosApp.jsx o un archivo AuthContext)
+// Asumimos que la lógica de Auth y el hook useAuth está disponible.
+// Importante: La lógica del frontend ya no necesita las funciones de Firebase client (signInWithEmailAndPassword, etc.)
+// porque el useAuth se encarga de eso.
+// Por simplicidad, importamos un stub de useAuth para que este archivo pueda ser un módulo separado.
+const AuthContext = createContext({
+    currentUser: null,
+    isAdmin: false,
+    loading: false,
+    logout: () => {},
+    loginAdmin: () => {}
+});
+const useAuth = () => useContext(AuthContext); // Reemplaza esta línea con la importación real de tu hook.
 
 /**
  * Admin panel — versión estética (Tailwind)
- *
- * Requisitos (client env vars):
- * NEXT_PUBLIC_FIREBASE_API_KEY
- * NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
- * NEXT_PUBLIC_FIREBASE_PROJECT_ID
- * NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
- * NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
- * NEXT_PUBLIC_FIREBASE_APP_ID
- *
- * Endpoints esperados en server:
- * GET /api/pets
- * POST /api/pets (Authorization: Bearer <idToken>)
- * GET /api/products
- * POST /api/products (Authorization: Bearer <idToken>)
- * PATCH /api/products (Authorization: Bearer <idToken>)
- * POST /api/upload (Authorization: Bearer <idToken>, multipart/form-data)
- * GET /api/stats
- *
- * - This page uses Firebase Auth to sign in an admin user (email/password).
- * - After login it lists pets and products, allows create, edit stock and delete.
- * - Uploads images via /api/upload (server handles saving to Firebase Storage).
+ * * - Usa el hook useAuth para obtener el estado de la sesión (currentUser).
+ * - Usa currentUser.getIdToken() para asegurar todas las llamadas a la API (POST, DELETE, PATCH, UPLOAD).
  */
 
-/* ------------------ Firebase client init ------------------ */
-const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-};
+/* ------------------ API UTILS (Con Token de Firebase Auth) ------------------ */
 
-let app;
-try {
-  if (typeof window !== "undefined") {
-    app = initializeApp(firebaseConfig);
+// 📌 Función crucial para asegurar las llamadas
+async function getAuthHeader(user) {
+    if (!user) throw new Error("Usuario no autenticado para obtener token.");
+    
+    // Obtiene el token de sesión de Firebase del usuario logueado
+    const token = await user.getIdToken(); 
+    
+    return {
+        Authorization: `Bearer ${token}`,
+    };
+}
+
+// 📌 Función de subida de archivo (usa /api/upload y el token)
+async function uploadFileFn(file, user) {
+    const headers = await getAuthHeader(user);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch("/api/upload", {
+        method: "POST",
+        headers: headers, // Ya incluye el token. El 'Content-Type' se agrega automáticamente con FormData
+        body: formData,
+    });
+    
+    if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Error al subir la imagen");
+    }
+
+    const { urls } = await res.json();
+    return urls[0]; // Retorna la URL pública de Storage
+}
+
+/* ------------------ QuickUploader ------------------ */
+function QuickUploader({ user }) {
+  const fileRef = useRef(null);
+  const [uploading, setUploading] = useState(false);
+
+  async function onUpload() {
+    const f = fileRef.current.files[0];
+    if (!f) return alert("Elegí un archivo");
+    setUploading(true);
+    
+    try {
+      // 📌 Llamada a la función de subida con el token de usuario
+      const url = await uploadFileFn(f, user); 
+      if (url) {
+        // Muestra la URL para que el admin la copie y la use en los formularios de mascotas/productos
+        prompt("✅ Imagen subida a Firebase Storage. Copia la URL para usarla:", url); 
+      }
+    } catch (err) {
+      console.error(err);
+      alert("❌ Error subiendo imagen: " + err.message);
+    } finally {
+        setUploading(false);
+    }
   }
-} catch (e) {
-  // ignore if already initialized
-}
 
-const auth = typeof window !== "undefined" ? getAuth() : null;
-
-/* ------------------ Small UI components ------------------ */
-
-function Field({ label, children }) {
   return (
-    <label className="block mb-2 text-sm">
-      <div className="text-xs text-slate-600 mb-1">{label}</div>
-      {children}
-    </label>
-  );
-}
-
-function Card({ title, children }) {
-  return (
-    <div className="bg-white rounded-2xl shadow p-4">
-      {title && <h3 className="font-semibold text-[#38629F] mb-2">{title}</h3>}
-      {children}
+    <div className="space-y-2">
+      <h4 className="font-semibold text-sm">Subida Rápida de Imágenes</h4>
+      <input ref={fileRef} type="file" accept="image/*" />
+      <div className="flex gap-2">
+        <button 
+            onClick={onUpload} 
+            disabled={uploading}
+            className="px-3 py-2 bg-[#38629F] text-white rounded-lg hover:bg-[#38629F]/80 disabled:bg-gray-400 text-sm"
+        >
+          {uploading ? "Subiendo..." : "Subir a Storage"}
+        </button>
+      </div>
     </div>
   );
 }
 
-/* ------------------ Admin Page ------------------ */
+/* ------------------ Componente Administrador Principal ------------------ */
 
-export default function AdminPage() {
-  const [user, setUser] = useState(null);
-  const [email, setEmail] = useState("");
-  const [pwd, setPwd] = useState("");
-  const [loading, setLoading] = useState(false);
-
+export default function AdminPanel() {
+  // 📌 1. Usa el hook centralizado para obtener el estado y el usuario
+  const { currentUser, isAdmin, logout } = useAuth(); 
+  
   const [pets, setPets] = useState([]);
   const [products, setProducts] = useState([]);
-  const [stats, setStats] = useState({});
-  const [uploading, setUploading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [activeModal, setActiveModal] = useState(null); // 'pet', 'product'
+  const [creating, setCreating] = useState(false);
 
-  const [showNewPetModal, setShowNewPetModal] = useState(false);
-  const [showNewProductModal, setShowNewProductModal] = useState(false);
+  /* === PETS HANDLERS === */
 
-  const newPetForm = useRef(null);
-  const newProductForm = useRef(null);
-
-  useEffect(() => {
-    if (!auth) return;
-    const unsub = onAuthStateChanged(auth, (u) => {
-      setUser(u);
-      // when auth state changes, refresh lists
-      if (u) fetchAll();
-      else {
-        setPets([]);
-        setProducts([]);
-        setStats({});
-      }
-    });
-    // initial fetch (public)
-    fetchPublicLists();
-    return () => unsub();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  async function fetchPublicLists() {
+  const fetchPets = useCallback(async () => {
     try {
-      const [pR, prR] = await Promise.all([
-        fetch("/api/pets").then((r) => r.json()),
-        fetch("/api/products").then((r) => r.json()),
-      ]);
-      setPets(pR || []);
-      setProducts(prR || []);
-    } catch (err) {
-      console.error("fetch lists:", err);
-    }
-  }
-
-  async function fetchAll() {
-    await fetchPublicLists();
-    try {
-      const s = await fetch("/api/stats").then((r) => r.json()).catch(() => ({}));
-      setStats(s || {});
-    } catch (err) {
-      console.error("stats error", err);
-    }
-  }
-
-  async function handleLogin(e) {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      await signInWithEmailAndPassword(auth, email, pwd);
-      setEmail("");
-      setPwd("");
-    } catch (err) {
-      console.error(err);
-      alert("Error en login: " + (err.message || err));
+      setLoading(true);
+      // GET no necesita token, la API lo permite (ver pets.js)
+      const res = await fetch("/api/pets"); 
+      if (!res.ok) throw new Error("Error fetching pets");
+      const data = await res.json();
+      setPets(data);
+    } catch (e) {
+      console.error(e);
+      alert("Error cargando mascotas");
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
-  async function handleLogout() {
+  const handleCreatePet = async (petData) => {
+    if (!currentUser) return alert("Sesión expirada. Inicie sesión nuevamente.");
+    setCreating(true);
     try {
-      await signOut(auth);
-      setUser(null);
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
-  async function getIdToken() {
-    if (!auth || !auth.currentUser) return null;
-    return await auth.currentUser.getIdToken();
-  }
-
-  /* ------------------ Upload helper ------------------ */
-  async function uploadFile(file) {
-    if (!file) return null;
-    const token = await getIdToken();
-    if (!token) throw new Error("No token");
-
-    setUploading(true);
-    try {
-      const form = new FormData();
-      form.append("file", file);
-
-      const res = await fetch("/api/upload", {
+      const headers = await getAuthHeader(currentUser);
+      const res = await fetch("/api/pets", {
         method: "POST",
-        headers: { Authorization: "Bearer " + token },
-        body: form,
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify(petData),
       });
-      const json = await res.json();
-      if (res.ok) {
-        // endpoint returns { urls: [ ... ] }
-        const url = json.urls?.[0] ?? null;
-        return url;
-      } else {
-        console.error("upload failed", json);
-        throw new Error(json.error || "upload failed");
-      }
+
+      if (!res.ok) throw new Error("Error creando mascota");
+      setActiveModal(null);
+      await fetchPets(); // Recargar la lista
+    } catch (e) {
+      console.error(e);
+      alert("Error: " + e.message);
     } finally {
-      setUploading(false);
+        setCreating(false);
     }
-  }
+  };
 
-  /* ------------------ Create pet ------------------ */
-  async function handleCreatePet(e) {
-    e.preventDefault();
-    const form = newPetForm.current;
-    const name = form.name.value.trim();
-    const desc = form.desc.value.trim();
-    const file = form.photo.files[0];
-
-    if (!name) return alert("Nombre requerido");
-
+  const handleDeletePet = async (id) => {
+    if (!currentUser || !window.confirm(`¿Seguro que querés eliminar la mascota ${id}?`)) return;
     try {
-      let photoURL = "";
-      if (file) {
-        photoURL = await uploadFile(file);
-      }
-
-      const token = await getIdToken();
-      const r = await fetch("/api/pets", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token,
-        },
-        body: JSON.stringify({ name, desc, photoURL }),
+      const headers = await getAuthHeader(currentUser);
+      const res = await fetch(`/api/pets?id=${id}`, {
+        method: "DELETE",
+        headers: headers,
       });
 
-      if (!r.ok) {
-        const j = await r.json().catch(() => ({}));
-        throw new Error(j.error || "Error creando rescatado");
-      }
-
-      form.reset();
-      setShowNewPetModal(false);
-      fetchAll();
-    } catch (err) {
-      console.error(err);
-      alert("Error: " + (err.message || err));
+      if (!res.ok) throw new Error("Error eliminando mascota");
+      await fetchPets();
+    } catch (e) {
+      console.error(e);
+      alert("Error: " + e.message);
     }
-  }
+  };
 
-  /* ------------------ Create product ------------------ */
-  async function handleCreateProduct(e) {
-    e.preventDefault();
-    const form = newProductForm.current;
-    const name = form.name.value.trim();
-    const desc = form.desc.value.trim();
-    const price = Number(form.price.value);
-    const stock = Number(form.stock.value || 0);
-    const file = form.photo.files[0];
+  /* === PRODUCTS HANDLERS === */
 
-    if (!name || isNaN(price)) return alert("Nombre y precio requeridos");
-
+  const fetchProducts = useCallback(async () => {
     try {
-      let photoURL = "";
-      if (file) {
-        photoURL = await uploadFile(file);
-      }
+      // GET no necesita token
+      const res = await fetch("/api/products");
+      if (!res.ok) throw new Error("Error fetching products");
+      const data = await res.json();
+      setProducts(data);
+    } catch (e) {
+      console.error(e);
+      alert("Error cargando productos");
+    }
+  }, []);
 
-      const token = await getIdToken();
-      const r = await fetch("/api/products", {
+  const handleCreateProduct = async (productData) => {
+    if (!currentUser) return alert("Sesión expirada. Inicie sesión nuevamente.");
+    setCreating(true);
+    try {
+      const headers = await getAuthHeader(currentUser);
+      const res = await fetch("/api/products", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token,
-        },
-        body: JSON.stringify({ name, desc, price, stock, photoURL }),
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify(productData),
       });
 
-      if (!r.ok) {
-        const j = await r.json().catch(() => ({}));
-        throw new Error(j.error || "Error creando producto");
-      }
-
-      form.reset();
-      setShowNewProductModal(false);
-      fetchAll();
-    } catch (err) {
-      console.error(err);
-      alert("Error: " + (err.message || err));
+      if (!res.ok) throw new Error("Error creando producto");
+      setActiveModal(null);
+      await fetchProducts();
+    } catch (e) {
+      console.error(e);
+      alert("Error: " + e.message);
+    } finally {
+        setCreating(false);
     }
-  }
+  };
 
-  /* ------------------ Edit stock (prompt) ------------------ */
-  async function handleEditStock(product) {
-    const input = prompt("Nuevo stock para " + product.name, String(product.stock || 0));
-    if (input == null) return;
-    const newStock = Number(input);
-    if (isNaN(newStock)) return alert("Stock inválido");
-
+  const handleUpdateProductStock = async (id, newStock) => {
+    if (!currentUser) return alert("Sesión expirada. Inicie sesión nuevamente.");
     try {
-      const token = await getIdToken();
-      const r = await fetch("/api/products", {
+      const headers = await getAuthHeader(currentUser);
+      const res = await fetch(`/api/products?id=${id}`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token,
-        },
-        body: JSON.stringify({ id: product.id, stock: newStock }),
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify({ stock: newStock }),
       });
-      if (!r.ok) {
-        const j = await r.json().catch(() => ({}));
-        throw new Error(j.error || "Error actualizando stock");
-      }
-      fetchAll();
-    } catch (err) {
-      console.error(err);
-      alert("Error: " + (err.message || err));
-    }
-  }
 
-  /* ------------------ Delete helpers ------------------ */
-  async function handleDeletePet(id) {
-    if (!confirm("Eliminar rescatado?")) return;
+      if (!res.ok) throw new Error("Error actualizando stock");
+      await fetchProducts();
+    } catch (e) {
+      console.error(e);
+      alert("Error: " + e.message);
+    }
+  };
+
+  const handleDeleteProduct = async (id) => {
+    if (!currentUser || !window.confirm(`¿Seguro que querés eliminar el producto ${id}?`)) return;
     try {
-      const token = await getIdToken();
-      const r = await fetch(`/api/pets?id=${encodeURIComponent(id)}`, {
+      const headers = await getAuthHeader(currentUser);
+      const res = await fetch(`/api/products?id=${id}`, {
         method: "DELETE",
-        headers: { Authorization: "Bearer " + token },
+        headers: headers,
       });
-      if (!r.ok) throw new Error("Error eliminando");
-      fetchAll();
-    } catch (err) {
-      console.error(err);
-      alert("Error: " + (err.message || err));
+
+      if (!res.ok) throw new Error("Error eliminando producto");
+      await fetchProducts();
+    } catch (e) {
+      console.error(e);
+      alert("Error: " + e.message);
     }
+  };
+
+  useEffect(() => {
+    if (isAdmin) {
+      // Si ya está logueado, carga los datos
+      fetchPets();
+      fetchProducts();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAdmin]);
+
+  // Si no es admin (o si el componente está fuera del AdminPanel del PerritosRescatadosApp.jsx)
+  if (!isAdmin) {
+    return (
+      <div className="p-10 text-center">
+        <h1 className="text-3xl font-bold text-red-500">Acceso Denegado</h1>
+        <p className="mt-4">Solo administradores pueden acceder a esta sección.</p>
+        <button onClick={logout} className="mt-4 text-[#38629F] underline">Volver al Login</button>
+      </div>
+    );
   }
 
-  async function handleDeleteProduct(id) {
-    if (!confirm("Eliminar producto?")) return;
-    try {
-      const token = await getIdToken();
-      const r = await fetch(`/api/products?id=${encodeURIComponent(id)}`, {
-        method: "DELETE",
-        headers: { Authorization: "Bearer " + token },
-      });
-      if (!r.ok) throw new Error("Error eliminando");
-      fetchAll();
-    } catch (err) {
-      console.error(err);
-      alert("Error: " + (err.message || err));
-    }
+  // Si está cargando por primera vez (o el useEffect está cargando datos)
+  if (loading) {
+    return <div className="p-10 text-center text-xl text-[#38629F]">Cargando datos del panel...</div>;
   }
 
-  /* ------------------ Simple UI render ------------------ */
   return (
-    <div className="min-h-screen bg-[#F7E9DC]">
-      {/* Top bar */}
-      <header className="bg-[#38629F] text-white">
-        <div className="max-w-[1100px] mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img src="/img/Logo1.jpg" alt="logo" className="h-10" />
-            <div>
-              <div className="font-bold">Perritos Rescatados — Admin</div>
-              <div className="text-xs opacity-80">Panel de gestión</div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            {user ? (
-              <>
-                <div className="text-sm">Logueado: <strong>{user.email}</strong></div>
-                <button
-                  onClick={handleLogout}
-                  className="px-3 py-2 rounded-full bg-white text-[#38629F] font-semibold"
-                >
-                  Cerrar sesión
-                </button>
-              </>
-            ) : (
-              <form onSubmit={handleLogin} className="flex items-center gap-2">
-                <input
-                  type="email"
-                  placeholder="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="px-3 py-2 rounded-md text-sm"
-                  required
-                />
-                <input
-                  type="password"
-                  placeholder="contraseña"
-                  value={pwd}
-                  onChange={(e) => setPwd(e.target.value)}
-                  className="px-3 py-2 rounded-md text-sm"
-                  required
-                />
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="px-3 py-2 rounded-md bg-[#F5793B] text-white font-semibold"
-                >
-                  Entrar
-                </button>
-              </form>
-            )}
-          </div>
+    <div className="p-6 md:p-10 bg-[#eff4fb] min-h-screen">
+      <div className="max-w-[1100px] mx-auto">
+        
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold text-[#38629F]">Panel de Administración</h1>
+          <button 
+            onClick={logout} 
+            className="px-4 py-2 bg-[#EA4E4E] text-white rounded-full text-sm hover:bg-[#EA4E4E]/80"
+          >
+            Cerrar Sesión
+          </button>
         </div>
-      </header>
 
-      <main className="max-w-[1100px] mx-auto px-4 py-8">
-        {/* Stats */}
-        <section className="grid md:grid-cols-3 gap-4 mb-6">
-          <Card title="Estadísticas">
-            <div className="space-y-2">
-              <div className="text-sm text-slate-600">Rescatados este mes</div>
-              <div className="text-2xl font-bold text-[#38629F]">{stats.rescatados_mes ?? "-"}</div>
-
-              <div className="text-sm text-slate-600 mt-3">Adoptados este mes</div>
-              <div className="text-2xl font-bold text-[#38629F]">{stats.adoptados_mes ?? "-"}</div>
-
-              <div className="text-sm text-slate-600 mt-3">Adoptados históricos</div>
-              <div className="text-2xl font-bold text-[#38629F]">{stats.adoptados_total ?? "-"}</div>
-            </div>
-          </Card>
-
-          <Card title="Acciones rápidas">
-            <div className="flex flex-col gap-3">
-              <button
-                onClick={() => setShowNewPetModal(true)}
-                className="px-4 py-2 bg-[#38629F] text-white rounded-md font-semibold"
-              >
-                + Nuevo rescatado
-              </button>
-
-              <button
-                onClick={() => setShowNewProductModal(true)}
-                className="px-4 py-2 bg-[#F5793B] text-white rounded-md font-semibold"
-              >
-                + Nuevo producto
-              </button>
-
-              <button
-                onClick={fetchAll}
-                className="px-4 py-2 border rounded-md text-sm"
-              >
-                Refrescar datos
-              </button>
-            </div>
-          </Card>
-
-          <Card title="Subida de imagen (rápida)">
-            <QuickUploader uploadFile={uploadFile} uploading={uploading} />
-          </Card>
+        {/* ------------------ Sección 1: Subida de Imágenes ------------------ */}
+        <section className="bg-white p-6 rounded-xl shadow-lg mb-8">
+            <QuickUploader user={currentUser} /> {/* Pasa el currentUser para obtener el token */}
         </section>
 
-        {/* Lists: pets & products */}
-        <section className="grid md:grid-cols-2 gap-6">
-          {/* Rescatados */}
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-semibold text-[#38629F]">Rescatados</h2>
-              <div className="text-sm text-slate-600">{pets.length} items</div>
-            </div>
-
-            <div className="grid gap-3">
-              {pets.map((p) => (
-                <div key={p.id} className="bg-white rounded-2xl p-3 flex gap-3 items-center shadow">
-                  <img src={p.photoURL || "/img/placeholder.jpg"} className="w-20 h-20 object-cover rounded-lg" alt={p.name} />
-                  <div className="flex-1">
-                    <div className="font-semibold text-[#38629F]">{p.name}</div>
-                    <div className="text-sm text-slate-600">{p.desc}</div>
-                    <div className="mt-2 flex gap-2">
-                      <button
-                        onClick={() => navigator.clipboard.writeText(window.location.origin + "/#rescatado-" + p.id)}
-                        className="text-xs px-2 py-1 rounded-md border"
-                      >
-                        Copiar link
-                      </button>
-                      <button
-                        onClick={() => handleDeletePet(p.id)}
-                        className="text-xs px-2 py-1 rounded-md bg-red-600 text-white"
-                      >
-                        Eliminar
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+        {/* ------------------ Sección 2: Mascotas ------------------ */}
+        <section className="bg-white p-6 rounded-xl shadow-lg mb-8">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold text-[#38629F]">Mascotas en Adopción ({pets.length})</h2>
+            <button 
+                onClick={() => setActiveModal('pet')}
+                className="px-4 py-2 bg-[#38629F] text-white rounded-lg hover:bg-[#38629F]/80 text-sm disabled:bg-gray-400"
+                disabled={creating}
+            >
+                {creating ? 'Creando...' : '+ Nueva Mascota'}
+            </button>
           </div>
-
-          {/* Productos */}
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-semibold text-[#38629F]">Productos</h2>
-              <div className="text-sm text-slate-600">{products.length} items</div>
-            </div>
-
-            <div className="grid gap-3">
-              {products.map((prod) => (
-                <div key={prod.id} className="bg-white rounded-2xl p-3 flex gap-3 items-center shadow">
-                  <img src={prod.photoURL || "/img/placeholder.jpg"} className="w-20 h-20 object-cover rounded-lg" alt={prod.name} />
-                  <div className="flex-1">
-                    <div className="flex items-baseline justify-between gap-3">
-                      <div>
-                        <div className="font-semibold text-[#38629F]">{prod.name}</div>
-                        <div className="text-sm text-slate-600">{prod.desc}</div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-lg font-bold text-[#38629F]">${prod.price}</div>
-                        <div className="text-sm text-slate-600">Stock: {prod.stock ?? 0}</div>
-                      </div>
-                    </div>
-
-                    <div className="mt-3 flex gap-2">
-                      <button
-                        onClick={() => handleEditStock(prod)}
-                        className="px-3 py-1 text-sm border rounded-md"
-                      >
-                        Editar stock
-                      </button>
-
-                      <button
-                        onClick={() => handleDeleteProduct(prod.id)}
-                        className="px-3 py-1 text-sm bg-red-600 text-white rounded-md"
-                      >
-                        Eliminar
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <p className="text-sm text-slate-600 mb-4">
+            Datos de Firestore que aparecen en la sección "Adopciones".
+          </p>
+          {pets.length === 0 ? (
+            <p className="text-slate-500 italic">No hay mascotas en la lista.</p>
+          ) : (
+            <MascotasTable pets={pets} onDelete={handleDeletePet} />
+          )}
         </section>
-      </main>
 
-      <footer className="bg-white border-t mt-8 py-6">
-        <div className="max-w-[1100px] mx-auto px-4 text-center text-sm text-slate-600">
-          Panel administrativo — Perritos Rescatados
-        </div>
-      </footer>
+        {/* ------------------ Sección 3: Tienda ------------------ */}
+        <section className="bg-white p-6 rounded-xl shadow-lg">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold text-[#38629F]">Productos de la Tienda ({products.length})</h2>
+            <button 
+                onClick={() => setActiveModal('product')}
+                className="px-4 py-2 bg-[#38629F] text-white rounded-lg hover:bg-[#38629F]/80 text-sm disabled:bg-gray-400"
+                disabled={creating}
+            >
+                {creating ? 'Creando...' : '+ Nuevo Producto'}
+            </button>
+          </div>
+          <p className="text-sm text-slate-600 mb-4">
+            Datos de Firestore para la sección "Tienda". Stock afecta a las compras de Mercado Pago.
+          </p>
+          {products.length === 0 ? (
+             <p className="text-slate-500 italic">No hay productos en la tienda.</p>
+          ) : (
+            <ProductsTable 
+                products={products} 
+                onDelete={handleDeleteProduct} 
+                onUpdateStock={handleUpdateProductStock} 
+            />
+          )}
+        </section>
+      </div>
 
-      {/* ------------------- MODALES ------------------- */}
-      {showNewPetModal && (
-        <Modal onClose={() => setShowNewPetModal(false)} title="Crear nuevo rescatado">
-          <form ref={newPetForm} onSubmit={handleCreatePet} className="space-y-3">
-            <Field label="Nombre">
-              <input name="name" className="w-full border rounded px-3 py-2" required />
-            </Field>
-            <Field label="Descripción">
-              <textarea name="desc" className="w-full border rounded px-3 py-2" rows="3" />
-            </Field>
-            <Field label="Foto">
-              <input name="photo" type="file" accept="image/*" />
-              <div className="text-xs text-slate-500 mt-1">Se recomienda 800x600</div>
-            </Field>
-            <div className="flex justify-end gap-2">
-              <button type="button" onClick={() => setShowNewPetModal(false)} className="px-4 py-2 border rounded">Cancelar</button>
-              <button type="submit" className="px-4 py-2 bg-[#38629F] text-white rounded">Crear</button>
-            </div>
-          </form>
+      {/* ------------------ Modals ------------------ */}
+      {activeModal === 'pet' && (
+        <Modal onClose={() => setActiveModal(null)} title="Crear Nueva Mascota">
+          <PetForm onSubmit={handleCreatePet} isSubmitting={creating} />
         </Modal>
       )}
 
-      {showNewProductModal && (
-        <Modal onClose={() => setShowNewProductModal(false)} title="Crear nuevo producto">
-          <form ref={newProductForm} onSubmit={handleCreateProduct} className="space-y-3">
-            <Field label="Nombre">
-              <input name="name" className="w-full border rounded px-3 py-2" required />
-            </Field>
-            <Field label="Descripción">
-              <textarea name="desc" className="w-full border rounded px-3 py-2" rows="3" />
-            </Field>
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="Precio">
-                <input name="price" type="number" step="0.01" className="w-full border rounded px-3 py-2" required />
-              </Field>
-              <Field label="Stock">
-                <input name="stock" type="number" className="w-full border rounded px-3 py-2" defaultValue={0} />
-              </Field>
-            </div>
-            <Field label="Foto">
-              <input name="photo" type="file" accept="image/*" />
-            </Field>
-            <div className="flex justify-end gap-2">
-              <button type="button" onClick={() => setShowNewProductModal(false)} className="px-4 py-2 border rounded">Cancelar</button>
-              <button type="submit" className="px-4 py-2 bg-[#F5793B] text-white rounded">Crear producto</button>
-            </div>
-          </form>
+      {activeModal === 'product' && (
+        <Modal onClose={() => setActiveModal(null)} title="Crear Nuevo Producto">
+          <ProductForm onSubmit={handleCreateProduct} isSubmitting={creating} />
         </Modal>
       )}
     </div>
   );
 }
 
-/* ------------------ Modal component ------------------ */
+/* ------------------ Sub-Componentes (Forms y Tablas) ------------------ */
+
 function Modal({ children, onClose, title }) {
+  // Se mantiene igual
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="bg-white rounded-2xl max-w-xl w-full p-6">
@@ -594,33 +365,201 @@ function Modal({ children, onClose, title }) {
   );
 }
 
-/* ------------------ QuickUploader ------------------ */
-function QuickUploader({ uploadFile, uploading }) {
-  const fileRef = useRef(null);
+function PetForm({ onSubmit, isSubmitting }) {
+  const [name, setName] = useState('');
+  const [desc, setDesc] = useState('');
+  const [photoURL, setPhotoURL] = useState(''); // Usa 'photoURL' para la URL de la imagen principal
+  const [link, setLink] = useState(''); // Link para más información
 
-  async function onUpload() {
-    const f = fileRef.current.files[0];
-    if (!f) return alert("Elegí un archivo");
-    try {
-      const url = await uploadFile(f);
-      if (url) {
-        prompt("Imagen subida. Copiala si la querés usar:", url);
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Error subiendo imagen");
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!name || !desc || !photoURL) {
+      alert("Por favor, completa todos los campos.");
+      return;
     }
-  }
+    // 📌 Se asume que tu API de pets acepta 'name', 'desc', 'photoURL' y 'link'.
+    onSubmit({ name, desc, photoURL, link, imgs: [photoURL] }); // Usamos photoURL también como primer elemento del array imgs
+  };
 
   return (
-    <div className="space-y-2">
-      <input ref={fileRef} type="file" accept="image/*" />
-      <div className="flex gap-2">
-        <button onClick={onUpload} className="px-3 py-2 bg-[#38629F] text-white rounded" disabled={uploading}>
-          {uploading ? "Subiendo..." : "Subir"}
-        </button>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <p className="text-xs text-red-500">
+        Recordá usar el "Subidor Rápido" para obtener la URL de la imagen (debe ser de Storage).
+      </p>
+      <input type="text" placeholder="Nombre" value={name} onChange={(e) => setName(e.target.value)} className="w-full p-2 border rounded" required />
+      <textarea placeholder="Descripción (Edad, carácter, etc.)" value={desc} onChange={(e) => setDesc(e.target.value)} className="w-full p-2 border rounded" required />
+      <input type="url" placeholder="URL de la Foto Principal (Firebase Storage)" value={photoURL} onChange={(e) => setPhotoURL(e.target.value)} className="w-full p-2 border rounded" required />
+      <input type="url" placeholder="Link de Facebook/Instagram (Opcional)" value={link} onChange={(e) => setLink(e.target.value)} className="w-full p-2 border rounded" />
+      
+      <button 
+        type="submit" 
+        disabled={isSubmitting}
+        className="w-full px-4 py-2 bg-[#F5793B] text-white rounded-lg hover:bg-[#F5793B]/80 disabled:bg-gray-400"
+      >
+        {isSubmitting ? 'Guardando...' : 'Crear Mascota'}
+      </button>
+    </form>
+  );
+}
+
+function ProductForm({ onSubmit, isSubmitting }) {
+  const [name, setName] = useState('');
+  const [desc, setDesc] = useState('');
+  const [price, setPrice] = useState('');
+  const [stock, setStock] = useState(1);
+  const [img, setImg] = useState('');
+  const [hasSizes, setHasSizes] = useState(false);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!name || !price || !img) {
+      alert("Por favor, completa el nombre, precio e imagen.");
+      return;
+    }
+    // 📌 Se asume que tu API de products acepta estos campos.
+    onSubmit({ name, desc, price: Number(price), stock: Number(stock), img, hasSizes });
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <input type="text" placeholder="Nombre del Producto" value={name} onChange={(e) => setName(e.target.value)} className="w-full p-2 border rounded" required />
+      <input type="url" placeholder="URL de la Imagen (Firebase Storage)" value={img} onChange={(e) => setImg(e.target.value)} className="w-full p-2 border rounded" required />
+      <input type="number" placeholder="Precio ($ARS)" value={price} onChange={(e) => setPrice(e.target.value)} className="w-full p-2 border rounded" required min="1" />
+      <input type="number" placeholder="Stock Inicial" value={stock} onChange={(e) => setStock(e.target.value)} className="w-full p-2 border rounded" required min="1" />
+      <textarea placeholder="Descripción (Opcional)" value={desc} onChange={(e) => setDesc(e.target.value)} className="w-full p-2 border rounded" />
+      
+      <div className="flex items-center">
+        <input 
+            id="hasSizes" 
+            type="checkbox" 
+            checked={hasSizes} 
+            onChange={(e) => setHasSizes(e.target.checked)} 
+            className="w-4 h-4 text-[#38629F] border-gray-300 rounded"
+        />
+        <label htmlFor="hasSizes" className="ml-2 text-sm text-slate-700">El producto tiene talles (S, M, L, XL)</label>
       </div>
-      <div className="text-xs text-slate-500">Usa esto para subir imágenes rápidamente y pegar la URL en formularios.</div>
+
+      <button 
+        type="submit" 
+        disabled={isSubmitting}
+        className="w-full px-4 py-2 bg-[#F5793B] text-white rounded-lg hover:bg-[#F5793B]/80 disabled:bg-gray-400"
+      >
+        {isSubmitting ? 'Guardando...' : 'Crear Producto'}
+      </button>
+    </form>
+  );
+}
+
+
+function MascotasTable({ pets, onDelete }) {
+  return (
+    <div className="overflow-x-auto">
+      <table className="min-w-full divide-y divide-gray-200">
+        <thead className="bg-gray-50">
+          <tr>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Creado</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+          </tr>
+        </thead>
+        <tbody className="bg-white divide-y divide-gray-200">
+          {pets.map((pet) => (
+            <tr key={pet.id}>
+              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{pet.name}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {pet.createdAt ? new Date(pet.createdAt._seconds * 1000).toLocaleDateString() : 'N/A'}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm">
+                <button
+                  onClick={() => onDelete(pet.id)}
+                  className="text-red-600 hover:text-red-900 ml-4"
+                >
+                  Eliminar
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function ProductsTable({ products, onDelete, onUpdateStock }) {
+  const [editStockId, setEditStockId] = useState(null);
+  const [newStock, setNewStock] = useState('');
+
+  const handleEdit = (id, currentStock) => {
+    setEditStockId(id);
+    setNewStock(currentStock.toString());
+  };
+
+  const handleSaveStock = (id) => {
+    if (newStock === '' || isNaN(Number(newStock))) {
+      alert("Stock inválido.");
+      return;
+    }
+    onUpdateStock(id, Number(newStock));
+    setEditStockId(null);
+  };
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="min-w-full divide-y divide-gray-200">
+        <thead className="bg-gray-50">
+          <tr>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+          </tr>
+        </thead>
+        <tbody className="bg-white divide-y divide-gray-200">
+          {products.map((p) => (
+            <tr key={p.id}>
+              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{p.name}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${p.price}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {editStockId === p.id ? (
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="number"
+                      value={newStock}
+                      onChange={(e) => setNewStock(e.target.value)}
+                      className="w-16 p-1 border rounded text-sm"
+                      min="0"
+                    />
+                    <button
+                      onClick={() => handleSaveStock(p.id)}
+                      className="text-green-600 hover:text-green-900 font-semibold"
+                    >
+                      Guardar
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-2">
+                    <span>{p.stock}</span>
+                    <button
+                      onClick={() => handleEdit(p.id, p.stock)}
+                      className="text-[#38629F] hover:text-[#38629F]/70"
+                    >
+                      (Editar)
+                    </button>
+                  </div>
+                )}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm">
+                <button
+                  onClick={() => onDelete(p.id)}
+                  className="text-red-600 hover:text-red-900"
+                >
+                  Eliminar
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

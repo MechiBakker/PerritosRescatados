@@ -1,2 +1,5 @@
 .vercel
 .env.local
+
+# Archivos de entorno local
+.env.local
