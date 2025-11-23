@@ -275,7 +275,8 @@ function PetImageCarousel({ imgs, name }) {
     };
 
     return (
-        <div className="relative h-64 overflow-hidden rounded-t-2xl">
+        // 📌 CAMBIO: Altura aumentada a h-72
+        <div className="relative h-72 overflow-hidden rounded-t-2xl"> 
             {/* Contenedor de imágenes que se desplaza */}
             <div 
                 className="flex transition-transform duration-300 h-full"
@@ -289,7 +290,7 @@ function PetImageCarousel({ imgs, name }) {
                         className="w-full h-full object-cover flex-shrink-0"
                         style={{ width: `${100 / imgs.length}%` }}
                         // Ajuste para simulación: usa un placeholder si la URL es incorrecta
-                        onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/340x256/D9E3F1/38629F?text=Foto"; }}
+                        onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/400x288/D9E3F1/38629F?text=Foto"; }}
                     />
                 ))}
             </div>
@@ -338,7 +339,7 @@ function CarouselPetsDynamic({ mascotas }) {
     if (!el) return;
     const card = el.querySelector("[data-card]");
     // Calcula el desplazamiento: ancho de la tarjeta + gap (16px)
-    const delta = card ? card.getBoundingClientRect().width + 16 : 340; // Ajustado a nueva medida
+    const delta = card ? card.getBoundingClientRect().width + 16 : 400; // Ajustado a nueva medida
     el.scrollBy({ left: dir * delta, behavior: "smooth" });
   };
 
@@ -366,10 +367,10 @@ function CarouselPetsDynamic({ mascotas }) {
           <article
             key={p.id}
             data-card
-            // 📌 CAMBIO: Aumento del ancho de la tarjeta
-            className="min-w-[300px] max-w-[340px] snap-start bg-white rounded-2xl shadow hover:shadow-lg transition-shadow"
+            // 📌 CAMBIO: Aumento del ancho de la tarjeta (para que quepan 3 en pantallas grandes)
+            className="min-w-[340px] max-w-[400px] snap-start bg-white rounded-2xl shadow hover:shadow-lg transition-shadow"
           >
-            {/* 📌 CAMBIO: Uso del nuevo carrusel interno para múltiples imágenes */}
+            {/* 📌 Uso del nuevo carrusel interno para múltiples imágenes */}
             <PetImageCarousel imgs={p.imgs} name={p.name} />
 
             <div className="p-4">
@@ -462,7 +463,7 @@ function Adopciones() {
 
         <br />
 
-        {/* 📌 Reemplazando el carrusel de Instagram por el Carrusel Dinámico de Mascotas */}
+        {/* 📌 Carrusel Dinámico de Mascotas */}
           <div className="mt-10">
             <h3 className="text-[#38629F] text-xl font-semibold text-center mb-3">
               🐾 Nuestros rescatados buscando hogar
@@ -774,7 +775,8 @@ function Tienda() {
 function StatCard({ title, value }) {
     return (
       <div className="bg-white p-6 rounded-xl shadow-lg border border-[#38629F]/20">
-        <p className="text-5xl font-extrabold text-[#EA4E4E] mb-2">{value}</p>
+        {/* 📌 CAMBIO: Color del número a naranja (#F5793B) */}
+        <p className="text-5xl font-extrabold text-[#F5793B] mb-2">{value}</p> 
         <h3 className="text-lg font-medium text-slate-700">{title}</h3>
       </div>
     );
@@ -995,9 +997,9 @@ export default function PerritosRescatadosApp() {
         <Hero />
         <Adopciones />
         <Transitos />
-        <Tienda/>        
-        {/* 📌 SECCIÓN DE ESTADÍSTICAS AGREGADA AQUÍ */}
+        {/* 📌 CAMBIO DE ORDEN: Estadísticas movida aquí */}
         <Estadisticas /> 
+        <Tienda/>        
         <Colabora />
       </main>
 
