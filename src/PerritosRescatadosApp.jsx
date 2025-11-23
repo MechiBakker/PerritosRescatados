@@ -1,75 +1,130 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import InstagramCarousel from "./InstagramCarousel"; // Asumo que este componente sigue siendo útil
-// import Login from "./Login"; // En una app real, este se importaría aparte
-// import AdminPanel from "./AdminPanel"; // En una app real, este se importaría aparte
+import React, { useEffect, useMemo, useRef, useState, useContext, createContext } from "react";
+// import InstagramCarousel from "./InstagramCarousel"; // No usado, se mantiene por si acaso
 
-/* ================= SIMULACIÓN DE DATOS DINÁMICOS (Backend) ================= */
-// Función de simulación para cargar datos de adopciones
-const fetchMascotas = () => {
-  // 📌 CAMBIO: 'imgs' es un array de URLs
-  return [
-    { 
-      id: 1, 
-      name: "Max", 
-      age: "2 años", 
-      desc: "Perro muy juguetón, ideal para familias activas.", 
-      imgs: ["/img/perro1_a.jpg", "/img/perro1_b.jpg", "/img/perro1_c.jpg"], // Múltiples fotos
-      link: "https://www.instagram.com/p/mascota1/" 
-    },
-    { 
-      id: 2, 
-      name: "Luna", 
-      age: "6 meses", 
-      desc: "Cachorra tímida, necesita un hogar con mucha paciencia.", 
-      imgs: ["/img/perro2_a.jpg", "/img/perro2_b.jpg"], 
-      link: "https://www.instagram.com/p/mascota2/" 
-    },
-    { 
-      id: 3, 
-      name: "Coco", 
-      age: "5 años", 
-      desc: "Gato tranquilo, busca un lugar para descansar y recibir mimos.", 
-      imgs: ["/img/gato1_a.jpg"], 
-      link: "https://www.instagram.com/p/mascota3/" 
-    },
-    { 
-      id: 4, 
-      name: "Toby", 
-      age: "1 año", 
-      desc: "Energético, necesita mucho ejercicio y espacio para correr.", 
-      imgs: ["/img/perro3_a.jpg", "/img/perro3_b.jpg"], 
-      link: "https://www.instagram.com/p/mascota4/" 
-    },
-  ];
+/* ================= FIREBASE CLIENT SETUP & AUTH CONTEXT ================= */
+// 🚨 ATENCIÓN: Reemplaza estos imports con tus archivos de configuración reales.
+// Por ahora, usamos stubs de la librería de Firebase para estructurar el código.
+// import { initializeApp } from "firebase/app"; 
+// import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
+
+// Asumimos que tienes una configuración similar a la siguiente en un archivo 'firebase.js':
+/*
+const firebaseConfig = {
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+*/
+
+const AuthContext = createContext();
+
+// Hook personalizado para simular (y luego integrar) Firebase Auth
+const useFirebaseAuth = () => {
+  const [currentUser, setCurrentUser] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // 📌 useEffect: Conexión real a onAuthStateChanged de Firebase Auth
+  useEffect(() => {
+    // 🚨 Aquí deberías usar onAuthStateChanged(auth, (user) => { ... })
+    
+    // --- SIMULACIÓN DE onAuthStateChanged (Para que funcione sin Firebase real) ---
+    const storedAdmin = localStorage.getItem('is_admin') === 'true';
+    if (storedAdmin) {
+        setCurrentUser({ uid: 'admin_uid_simulated', email: 'admin@example.com' });
+        setIsAdmin(true);
+    }
+    setLoading(false);
+    // ----------------------------------------------------------------------------
+
+    // return () => unsubscribe(); // Limpieza del listener de Firebase
+  }, []);
+
+  const loginAdmin = async (email, password) => {
+    setLoading(true);
+    try {
+      // 📌 REEMPLAZAR con:
+      // const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      // const idToken = await userCredential.user.getIdTokenResult();
+      // const isAdminUser = idToken.claims.admin === true; // Necesitas configurar un custom claim 'admin: true'
+      
+      // --- SIMULACIÓN DE LOGIN ---
+      if (email === "admin@perritos.com" && password === "password_segura") {
+        const user = { uid: 'admin_uid_simulated', email };
+        setCurrentUser(user);
+        setIsAdmin(true);
+        localStorage.setItem('is_admin', 'true'); // Simular persistencia
+        return { success: true, user };
+      } else {
+        throw new Error("Credenciales inválidas.");
+      }
+      // ----------------------------
+
+    } catch (error) {
+      console.error("Error de login:", error.message);
+      setIsAdmin(false);
+      return { success: false, error: error.message };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const logout = async () => {
+    // 📌 REEMPLAZAR con: await signOut(auth); 
+    setCurrentUser(null);
+    setIsAdmin(false);
+    localStorage.removeItem('is_admin'); 
+    window.location.hash = '#';
+  };
+
+  return { currentUser, isAdmin, loading, loginAdmin, logout };
 };
 
-// Función de simulación para cargar datos de la tienda
-const fetchProductos = () => {
-  return [
-    { id: 1, nombre: "Remeras", img: "/img/remera.jpg", precio: "25.000", hasSizes: true, mpUrl: "https://link-mp-remeras" },
-    { id: 2, nombre: "Totebags", img: "/img/totebag.jpg", precio: "13.000", hasSizes: false, mpUrl: "https://link-mp-totebags" },
-    { id: 3, nombre: "Velas", img: "/img/vela.jpg", precio: "5.000", hasSizes: false, mpUrl: "https://link-mp-velas" },
-    { id: 4, nombre: "Comederos Marote", img: "/img/comederos.jpg", precio: "3.000 / 4.000", hasSizes: false, mpUrl: "https://link-mp-comederos" },
-    { id: 5, nombre: "Frisbees", img: "/img/frisbee.jpg", precio: "4.000", hasSizes: false, mpUrl: "https://link-mp-frisbees" },
-    { id: 6, nombre: "Cepillos", img: "/img/cepillo.jpg", precio: "2.500", hasSizes: false, mpUrl: "https://link-mp-cepillo" },
-  ];
+export const useAuth = () => useContext(AuthContext);
+
+const AuthProvider = ({ children }) => {
+  const auth = useFirebaseAuth();
+  return <AuthContext.Provider value={auth}>{children}</AuthContext.Provider>;
+};
+/* ================= FIN FIREBASE AUTH CONTEXT ================= */
+
+
+/* ================= API DATA FETCHING (INTEGRADO A FIREBASE BACKEND) ================= */
+// Estas funciones ahora hacen peticiones reales a tus endpoints de Firebase/Next.js
+// La autenticación es manejada por Firebase Auth en el admin.
+
+const fetchMascotas = async () => {
+  // GET /api/pets trae la lista de rescatados de Firestore
+  const response = await fetch('/api/pets');
+  if (!response.ok) throw new Error("Error fetching pets");
+  return response.json();
 };
 
-// Función de simulación para cargar estadísticas desde Google Sheets
-const fetchEstadisticas = () => {
-    // Aquí tu backend llamaría al API de Google Sheets
-    return {
-        rescatesMes: '45',
-        adopcionesMes: '22',
-        rescatesHistorico: '1.280',
-    };
+const fetchProductos = async () => {
+  // GET /api/products trae la lista de productos de Firestore
+  const response = await fetch('/api/products');
+  if (!response.ok) throw new Error("Error fetching products");
+  return response.json();
 };
-/* ================= FIN SIMULACIÓN ================= */
+
+const fetchEstadisticas = async () => {
+  // GET /api/stats lee las métricas de Google Sheets
+  const response = await fetch('/api/stats');
+  if (!response.ok) throw new Error("Error fetching stats");
+  // Asumimos que devuelve un objeto { rescatesMes: 'X', adopcionesMes: 'Y', ... }
+  return response.json();
+};
+/* ================= FIN API DATA FETCHING ================= */
 
 
 /* ================= HEADER ================= */
-// Se mantiene igual. Solo se añade el link al login simulado.
-function Header({ onLoginToggle, isAdmin }) {
+function Header() {
+  const { isAdmin, logout, loading, currentUser } = useAuth();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -77,6 +132,16 @@ function Header({ onLoginToggle, isAdmin }) {
     window.addEventListener("keydown", onEsc);
     return () => window.removeEventListener("keydown", onEsc);
   }, []);
+
+  // Función para cerrar el menú y ejecutar la acción
+  const handleAdminAction = () => {
+    setOpen(false);
+    if (isAdmin) {
+      logout();
+    } else {
+      window.location.hash = '#admin-login';
+    }
+  }
 
   return (
     <header className="sticky top-0 z-50 bg-[#38629F] text-white shadow-md">
@@ -107,46 +172,26 @@ function Header({ onLoginToggle, isAdmin }) {
         {/* Menú en desktop */}
         <nav
           id="primary-nav"
-          className="hidden lg:flex gap-6 text-sm font-bold"
+          className="hidden lg:flex gap-6 text-sm font-bold items-center" 
         >
-          <a
-            className="hover:text-[#F7E9DC] transition-colors"
-            href="#quienes-somos"
-          >
-            ¿Quiénes somos?
-          </a>
-          <a
-            className="hover:text-[#F7E9DC] transition-colors"
-            href="#adopciones"
-          >
-            Adopciones
-          </a>
-          <a
-            className="hover:text-[#F7E9DC] transition-colors"
-            href="#transitos"
-          >
-            Tránsitos
-          </a>
-          <a
-            className="hover:text-[#F7E9DC] transition-colors"
-            href="#tienda"
-            >
-              Tienda
-            </a>
-          <a
-            className="hover:text-[#F7E9DC] transition-colors"
-            href="#colabora"
-          >
-            Colaborá
-          </a>
-           {/* Botón Admin - Simulación */}
-           <button
-            onClick={() => onLoginToggle(!isAdmin)}
-            className="hover:text-[#F7E9DC] transition-colors focus:outline-none text-xs font-bold"
-            aria-label={isAdmin ? "Cerrar sesión de Admin" : "Iniciar sesión de Admin"}
-          >
-            {isAdmin ? "Admin (Salir)" : "Login"}
-          </button>
+          <a className="hover:text-[#F7E9DC] transition-colors" href="#quienes-somos">¿Quiénes somos?</a>
+          <a className="hover:text-[#F7E9DC] transition-colors" href="#adopciones">Adopciones</a>
+          <a className="hover:text-[#F7E9DC] transition-colors" href="#transitos">Tránsitos</a>
+          <a className="hover:text-[#F7E9DC] transition-colors" href="#tienda">Tienda</a>
+          <a className="hover:text-[#F7E9DC] transition-colors" href="#colabora">Colaborá</a>
+           
+           {/* 📌 Botón Admin Login/Logout - SOLO visible para Administradores o si NO hay sesión activa */}
+           {!loading && (
+             (isAdmin || !currentUser) && (
+              <button
+                onClick={handleAdminAction}
+                className="hover:text-[#F7E9DC] transition-colors focus:outline-none text-xs font-bold px-3 py-1 border border-white rounded-full hover:bg-white hover:text-[#38629F]"
+                aria-label={isAdmin ? "Cerrar sesión de Admin" : "Iniciar sesión de Admin"}
+              >
+                {isAdmin ? "Admin (Salir)" : "Admin Login"}
+              </button>
+             )
+           )}
         </nav>
       </div>
 
@@ -156,70 +201,36 @@ function Header({ onLoginToggle, isAdmin }) {
           open ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        <a
-          href="#quienes-somos"
-          className="hover:text-[#F7E9DC]"
-          onClick={() => setOpen(false)}
-        >
-          ¿Quiénes somos?
-        </a>
-        <a
-          href="#adopciones"
-          className="hover:text-[#F7E9DC]"
-          onClick={() => setOpen(false)}
-        >
-          Adopciones
-        </a>
-        <a
-          href="#transitos"
-          className="hover:text-[#F7E9DC]"
-          onClick={() => setOpen(false)}
-        >
-          Tránsitos
-        </a>
-        <a
-          href="#tienda"
-          className="hover:text-[#F7E9DC]"
-          onClick={() => setOpen(false)}
-        >
-          Tienda
-        </a>
-        <a
-          href="#colabora"
-          className="hover:text-[#F7E9DC]"
-          onClick={() => setOpen(false)}
-        >
-          Colaborá
-        </a>
-        <button
-            onClick={() => { onLoginToggle(!isAdmin); setOpen(false); }}
-            className="mt-4 text-sm hover:text-[#F7E9DC] focus:outline-none"
-          >
-            {isAdmin ? "Admin (Salir)" : "Login"}
-          </button>
+        <a href="#quienes-somos" className="hover:text-[#F7E9DC]" onClick={() => setOpen(false)}>¿Quiénes somos?</a>
+        <a href="#adopciones" className="hover:text-[#F7E9DC]" onClick={() => setOpen(false)}>Adopciones</a>
+        <a href="#transitos" className="hover:text-[#F7E9DC]" onClick={() => setOpen(false)}>Tránsitos</a>
+        <a href="#tienda" className="hover:text-[#F7E9DC]" onClick={() => setOpen(false)}>Tienda</a>
+        <a href="#colabora" className="hover:text-[#F7E9DC]" onClick={() => setOpen(false)}>Colaborá</a>
+        
+        {/* Botón Admin en Mobile */}
+        {!loading && (
+            (isAdmin || !currentUser) && (
+                <button
+                    onClick={handleAdminAction}
+                    className="mt-4 text-sm hover:text-[#F7E9DC] focus:outline-none px-3 py-1 border border-white rounded-full hover:bg-white hover:text-[#38629F]"
+                >
+                    {isAdmin ? "Admin (Salir)" : "Admin Login"}
+                </button>
+            )
+        )}
       </nav>
     </header>
   );
 }
 
 
-const COLLAGE = [
-  "/img/013.jpeg",
-  "/img/008.jpeg",
-  "/img/001.jpeg",
-  "/img/018.jpeg",
-  "/img/002.jpeg",
-  "/img/019.jpeg",
-  "/img/024.jpeg",
-  "/img/033.jpeg",
-  "/img/030.jpeg",
-];
+/* ================= SECTIONS (Se mantienen igual, salvo la carga de datos) ================= */
+// ... (Hero, PetImageCarousel, CarouselPetsDynamic se mantienen iguales) ...
 
 function useYear() {
   return useMemo(() => new Date().getFullYear(), []);
 }
 
-/* ================= SECTIONS ================= */
 function Hero() {
   // Se mantiene sin cambios
   return (
@@ -275,7 +286,7 @@ function PetImageCarousel({ imgs, name }) {
     };
 
     return (
-        // 📌 CAMBIO: Altura aumentada a h-72
+        // Altura aumentada a h-72
         <div className="relative h-72 overflow-hidden rounded-t-2xl"> 
             {/* Contenedor de imágenes que se desplaza */}
             <div 
@@ -285,11 +296,11 @@ function PetImageCarousel({ imgs, name }) {
                 {imgs.map((src, index) => (
                     <img
                         key={index}
-                        src={src}
+                        // 📌 Las URL de las imágenes ahora serán de Firebase Storage
+                        src={src} 
                         alt={`${name} - Foto ${index + 1}`}
                         className="w-full h-full object-cover flex-shrink-0"
                         style={{ width: `${100 / imgs.length}%` }}
-                        // Ajuste para simulación: usa un placeholder si la URL es incorrecta
                         onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/400x288/D9E3F1/38629F?text=Foto"; }}
                     />
                 ))}
@@ -367,10 +378,9 @@ function CarouselPetsDynamic({ mascotas }) {
           <article
             key={p.id}
             data-card
-            // 📌 CAMBIO: Aumento del ancho de la tarjeta (para que quepan 3 en pantallas grandes)
+            // 📌 Ancho ajustado para 3 cards
             className="min-w-[340px] max-w-[400px] snap-start bg-white rounded-2xl shadow hover:shadow-lg transition-shadow"
           >
-            {/* 📌 Uso del nuevo carrusel interno para múltiples imágenes */}
             <PetImageCarousel imgs={p.imgs} name={p.name} />
 
             <div className="p-4">
@@ -408,13 +418,15 @@ function CarouselPetsDynamic({ mascotas }) {
 
 
 function Adopciones() {
-  // 📌 Carga de datos dinámica de mascotas
   const [mascotas, setMascotas] = useState([]);
+  const [loading, setLoading] = useState(true);
   
   useEffect(() => {
-    // Aquí se reemplazaría por tu llamada a la API
-    // fetch('/api/mascotas-adopcion').then(res => res.json()).then(setMascotas);
-    setMascotas(fetchMascotas());
+    setLoading(true);
+    fetchMascotas() // Llama a la API /api/pets
+      .then(setMascotas)
+      .catch(e => console.error("Error cargando mascotas:", e))
+      .finally(() => setLoading(false));
   }, []);
 
   return (
@@ -463,13 +475,16 @@ function Adopciones() {
 
         <br />
 
-        {/* 📌 Carrusel Dinámico de Mascotas */}
-          <div className="mt-10">
-            <h3 className="text-[#38629F] text-xl font-semibold text-center mb-3">
-              🐾 Nuestros rescatados buscando hogar
-            </h3>
+        <div className="mt-10">
+          <h3 className="text-[#38629F] text-xl font-semibold text-center mb-3">
+            🐾 Nuestros rescatados buscando hogar
+          </h3>
+          {loading ? (
+            <p className="text-center text-slate-500 mt-5">Cargando rescatados...</p>
+          ) : (
             <CarouselPetsDynamic mascotas={mascotas} /> 
-          </div>
+          )}
+        </div>
 
         <br />
       </div>
@@ -478,8 +493,19 @@ function Adopciones() {
 }
 
 
+const COLLAGE = [
+  "/img/013.jpeg",
+  "/img/008.jpeg",
+  "/img/001.jpeg",
+  "/img/018.jpeg",
+  "/img/002.jpeg",
+  "/img/019.jpeg",
+  "/img/024.jpeg",
+  "/img/033.jpeg",
+  "/img/030.jpeg",
+];
+
 function Transitos() {
-  // Se mantiene sin cambios
   return (
     <section id="transitos" className="py-16 bg-[#eff4fb]">
       <div className="max-w-[1100px] mx-auto px-4 grid md:grid-cols-2 gap-8 items-start">
@@ -549,35 +575,29 @@ function BuyForm({ item }) {
     setLoading(true);
 
     try {
-      // 💡 Aquí se reemplazaría por tu llamada al API de Mercado Pago
-      /*
-      const response = await fetch('/api/mercadopago/checkout', {
+      // 📌 REEMPLAZO: Llama al API /api/checkout que gestiona Mercado Pago y Stock
+      const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          productId: item.id,
-          productName: item.nombre,
-          price: item.precio, // Idealmente enviar el precio como número desde el backend
+          productId: item.id, // ID del producto en Firestore
           quantity,
           size,
         }),
       });
+
       const data = await response.json();
       
-      if (data.checkoutUrl) {
+      if (response.ok && data.checkoutUrl) {
+        // Redirige a la URL de pago de Mercado Pago
         window.open(data.checkoutUrl, '_blank');
       } else {
-        alert("Error al generar el link de pago.");
+        alert(data.error || "Error al generar el link de pago.");
       }
-      */
-
-      // SIMULACIÓN: Usar el URL estático proporcionado en la simulación
-      console.log(`Simulando compra de ${quantity}x ${item.nombre} (Talle: ${size || 'N/A'}). Redirigiendo a: ${item.mpUrl}`);
-      window.open(item.mpUrl, '_blank');
 
     } catch (error) {
       console.error("Error en la compra:", error);
-      alert("Hubo un error al procesar la compra. Intenta de nuevo.");
+      alert("Hubo un error al procesar la compra.");
     } finally {
       setLoading(false);
     }
@@ -621,13 +641,17 @@ function BuyForm({ item }) {
 
 function Tienda() {
   const [productos, setProductos] = useState([]);
+  const [loading, setLoading] = useState(true);
   const trackRef = useRef(null);
   const autoScrollRef = useRef(null);
 
   useEffect(() => {
-    // 📌 Carga de datos dinámica de productos
-    // fetch('/api/productos').then(res => res.json()).then(setProductos);
-    setProductos(fetchProductos());
+    // 📌 Llama a la API /api/products para cargar datos de Firestore
+    setLoading(true);
+    fetchProductos()
+      .then(setProductos)
+      .catch(e => console.error("Error cargando productos:", e))
+      .finally(() => setLoading(false));
   }, []);
 
   const scrollByCard = (dir) => {
@@ -640,11 +664,11 @@ function Tienda() {
 
   /* === AUTOPLAY === */
   useEffect(() => {
+    // ... (Lógica de Autoplay se mantiene igual)
     const el = trackRef.current;
     if (!el || productos.length === 0) return;
 
     const handleUserInteraction = () => {
-      // Detiene autoplay al tocar o arrastrar
       clearInterval(autoScrollRef.current);
       autoScrollRef.current = null;
     };
@@ -659,8 +683,7 @@ function Tienda() {
       scrollByCard(dir);
     };
 
-    // Solo se activa en mobile (<768px)
-    if (window.innerWidth < 768) {
+    if (window.innerWidth < 768 && !loading) {
       autoScrollRef.current = setInterval(autoplay, 3000);
     }
 
@@ -669,7 +692,7 @@ function Tienda() {
       el?.removeEventListener("touchstart", handleUserInteraction);
       el?.removeEventListener("mousedown", handleUserInteraction);
     };
-  }, [productos]);
+  }, [productos, loading]);
 
   return (
     <section id="tienda" className="py-16 bg-[#F7E9DC]">
@@ -682,7 +705,7 @@ function Tienda() {
           Todo lo recaudado se destina a la atención veterinaria, alimento y cuidados de nuestros rescatados. 💕
         </p>
         
-        {productos.length === 0 ? (
+        {loading ? (
             <p className="text-center text-slate-500">Cargando productos...</p>
         ) : (
             <>
@@ -721,7 +744,6 @@ function Tienda() {
                           {item.nombre}
                         </h3>
                         <p className="text-slate-600 font-medium mt-1">${item.precio}</p>
-                        {/* 📌 Nuevo Formulario de Compra */}
                         <BuyForm item={item} /> 
                       </div>
                     </article>
@@ -758,7 +780,6 @@ function Tienda() {
                         {item.nombre}
                       </h3>
                       <p className="text-slate-600 font-medium mt-1">${item.precio}</p>
-                      {/* 📌 Nuevo Formulario de Compra */}
                       <BuyForm item={item} />
                     </div>
                   </article>
@@ -771,11 +792,11 @@ function Tienda() {
   );
 }
 
-// 📌 Nuevo Componente de Estadísticas
+
 function StatCard({ title, value }) {
     return (
       <div className="bg-white p-6 rounded-xl shadow-lg border border-[#38629F]/20">
-        {/* 📌 CAMBIO: Color del número a naranja (#F5793B) */}
+        {/* 📌 Color del número a naranja (#F5793B) */}
         <p className="text-5xl font-extrabold text-[#F5793B] mb-2">{value}</p> 
         <h3 className="text-lg font-medium text-slate-700">{title}</h3>
       </div>
@@ -788,11 +809,18 @@ function Estadisticas() {
         adopcionesMes: '...',
         rescatesHistorico: '...'
     });
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // 📌 Carga de datos dinámica de estadísticas desde el backend/Google Sheets
-        // fetch('/api/stats-google-sheets').then(res => res.json()).then(setStats);
-        setStats(fetchEstadisticas());
+        // 📌 Llama a la API /api/stats para cargar métricas
+        setLoading(true);
+        fetchEstadisticas()
+          .then(data => {
+            // Asume que las claves son correctas o mapea si es necesario
+            setStats(data); 
+          })
+          .catch(e => console.error("Error cargando estadísticas:", e))
+          .finally(() => setLoading(false));
     }, []);
 
     return (
@@ -801,18 +829,23 @@ function Estadisticas() {
                 <h2 className="text-2xl md:text-3xl font-semibold text-[#38629F] mb-12">
                     📈 Nuestro Impacto
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <StatCard title="Rescates del Mes" value={stats.rescatesMes} />
-                    <StatCard title="Adopciones del Mes" value={stats.adopcionesMes} />
-                    <StatCard title="Rescates Históricos" value={stats.rescatesHistorico} />
-                </div>
+                {loading ? (
+                    <p className="text-center text-slate-500">Cargando datos...</p>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <StatCard title="Rescates del Mes" value={stats.rescatesMes || '0'} />
+                        <StatCard title="Adopciones del Mes" value={stats.adopcionesMes || '0'} />
+                        <StatCard title="Rescates Históricos" value={stats.rescatesHistorico || '0'} />
+                    </div>
+                )}
             </div>
         </section>
     );
 }
 
 function Colabora() {
-  // Se mantiene sin cambios
+  // Se mantiene sin cambios, pero usamos los links directos para Donar y Suscribir
+  const year = useYear();
   return (
     <section
       id="colabora"
@@ -830,6 +863,7 @@ function Colabora() {
 
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
           <a
+            // 📌 Link de MP para donación simple
             href="https://link.mercadopago.com.ar/perritosrescatados1"
             target="_blank"
             rel="noopener noreferrer"
@@ -839,6 +873,7 @@ function Colabora() {
            </a>
           
           <a
+            // 📌 Link de MP para suscripción
             href="https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=0335e4d01d024164a176c82074e2b61b"
             target="_blank"
             rel="noopener noreferrer"
@@ -926,33 +961,107 @@ function Footer() {
   );
 }
 
-// 📌 Nuevo componente simulado de Panel de Administración (ejemplo)
-function AdminPanel({ onLogout }) {
+/* ================= COMPONENTES DE ADMINISTRACIÓN ================= */
+
+// 📌 Componente de Login (Separado por hash routing)
+function AdminLogin() {
+    const { loginAdmin, loading } = useAuth();
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError('');
+        const { success, error: loginError } = await loginAdmin(email, password);
+        if (success) {
+            // Éxito: redirige al panel de administración (o simplemente borra el hash)
+            window.location.hash = '#admin-panel'; 
+        } else {
+            setError(loginError || "Email o contraseña incorrectos.");
+        }
+    };
+
     return (
-        <div className="max-w-[1100px] mx-auto px-4 py-16 min-h-screen">
+        <div className="max-w-md mx-auto px-4 py-16 min-h-screen">
+            <h1 className="text-3xl font-bold text-[#38629F] mb-6 text-center">Acceso de Administrador</h1>
+            
+            <form onSubmit={handleSubmit} className="bg-white p-8 rounded-xl shadow-lg border border-[#38629F]/20 space-y-4">
+                <p className="text-xs text-center text-slate-500 mb-4">
+                    Credenciales de prueba: **admin@perritos.com** / **password_segura**
+                </p>
+                {error && (
+                    <div className="p-3 bg-red-100 text-red-700 rounded text-sm">{error}</div>
+                )}
+                <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-slate-700">Email</label>
+                    <input
+                        id="email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="mt-1 block w-full p-2 border border-slate-300 rounded"
+                        required
+                    />
+                </div>
+                <div>
+                    <label htmlFor="password" className="block text-sm font-medium text-slate-700">Contraseña</label>
+                    <input
+                        id="password"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="mt-1 block w-full p-2 border border-slate-300 rounded"
+                        required
+                    />
+                </div>
+                <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full mt-4 py-2 px-4 rounded-full font-semibold text-white bg-[#38629F] hover:brightness-95 disabled:bg-gray-400"
+                >
+                    {loading ? 'Iniciando sesión...' : 'Ingresar'}
+                </button>
+                <div className="text-center">
+                    <a href="#" className="text-sm text-[#38629F] hover:underline" onClick={() => window.location.hash = '#'}>
+                        Volver al inicio
+                    </a>
+                </div>
+            </form>
+        </div>
+    );
+}
+
+// 📌 Componente de Panel de Administración (Simplificado)
+function AdminPanel() {
+    const { logout } = useAuth(); // Usa el logout real
+    // En una implementación real, aquí se usaría el componente completo de 'admin.jsx'
+
+    return (
+        <div className="max-w-[1100px] mx-auto px-4 py-16 min-h-screen bg-gray-50">
             <h1 className="text-4xl font-bold text-[#38629F] mb-8">Panel de Administración 🔐</h1>
-            <p className="text-slate-700 mb-6">Aquí puedes gestionar el contenido dinámico de la página.</p>
+            <p className="text-slate-700 mb-6">Gestioná el contenido de la página. El **componente de administración completo** con formularios CRUD está disponible en el archivo **`admin.jsx`**.</p>
             
             <div className="grid md:grid-cols-3 gap-6">
                 <div className="bg-white p-6 rounded-xl shadow-md border-t-4 border-[#38629F]">
-                    <h2 className="text-xl font-semibold mb-3">Gestión de Adopciones</h2>
-                    <p className="text-sm text-slate-600">Agregar, editar o eliminar mascotas disponibles para adopción, incluyendo la subida de múltiples fotos.</p>
-                    <button className="mt-4 text-white bg-green-500 px-4 py-2 rounded text-sm hover:bg-green-600">Abrir Panel</button>
+                    <h2 className="text-xl font-semibold mb-3">Mascotas (Adopciones)</h2>
+                    <p className="text-sm text-slate-600">Conectado a `/api/pets` (Firestore). Agrega, edita o elimina mascotas para la sección Adopciones.</p>
+                    <button className="mt-4 text-white bg-green-500 px-4 py-2 rounded text-sm hover:bg-green-600" onClick={() => alert("Simulando ir a la gestión de Mascotas")}>Gestionar</button>
                 </div>
                 <div className="bg-white p-6 rounded-xl shadow-md border-t-4 border-[#38629F]">
-                    <h2 className="text-xl font-semibold mb-3">Gestión de Tienda</h2>
-                    <p className="text-sm text-slate-600">Administrar stock, precios, talles y URL de Mercado Pago de los productos.</p>
-                    <button className="mt-4 text-white bg-green-500 px-4 py-2 rounded text-sm hover:bg-green-600">Abrir Panel</button>
+                    <h2 className="text-xl font-semibold mb-3">Tienda (Productos)</h2>
+                    <p className="text-sm text-slate-600">Conectado a `/api/products` (Firestore). Administra stock, precios y la URL de Mercado Pago.</p>
+                    <button className="mt-4 text-white bg-green-500 px-4 py-2 rounded text-sm hover:bg-green-600" onClick={() => alert("Simulando ir a la gestión de Productos")}>Gestionar</button>
                 </div>
                 <div className="bg-white p-6 rounded-xl shadow-md border-t-4 border-[#38629F]">
-                    <h2 className="text-xl font-semibold mb-3">Actualizar Estadísticas</h2>
-                    <p className="text-sm text-slate-600">Sincronizar o editar manualmente los números de rescates/adopciones (Google Sheets).</p>
-                    <button className="mt-4 text-white bg-green-500 px-4 py-2 rounded text-sm hover:bg-green-600">Abrir Panel</button>
+                    <h2 className="text-xl font-semibold mb-3">Imágenes (Storage)</h2>
+                    <p className="text-sm text-slate-600">Usa el endpoint `/api/upload` para subir imágenes a Firebase Storage y obtener URLs públicas.</p>
+                    <button className="mt-4 text-white bg-green-500 px-4 py-2 rounded text-sm hover:bg-green-600" onClick={() => alert("Simulando ir a la gestión de Subidas")}>Gestionar</button>
                 </div>
             </div>
 
             <button
-                onClick={onLogout}
+                onClick={logout}
                 className="mt-10 inline-flex items-center justify-center px-5 py-3 rounded-full font-semibold text-white bg-[#EA4E4E] hover:brightness-95"
             >
                 Cerrar Sesión
@@ -961,26 +1070,50 @@ function AdminPanel({ onLogout }) {
     );
 }
 
-/* ================= APP ================= */
-export default function PerritosRescatadosApp() {
-  // 📌 SIMULACIÓN DE AUTENTICACIÓN
-  const [isAdmin, setIsAdmin] = useState(false);
+/* ================= APP PRINCIPAL ================= */
+// Se envuelve la App con el AuthProvider
+export default function PerritosRescatadosAppWrapper() {
+    return (
+        <AuthProvider>
+            <PerritosRescatadosApp />
+        </AuthProvider>
+    );
+}
 
+function PerritosRescatadosApp() {
+  const { isAdmin, loading } = useAuth();
+  const [currentHash, setCurrentHash] = useState(window.location.hash);
+
+  // Hook para escuchar cambios en el hash (simulación de routing)
   useEffect(() => {
-    const hash = window.location.hash;
-    if (hash) {
-      const el = document.querySelector(hash);
-      el?.setAttribute("tabindex", "-1");
-      el?.focus({ preventScroll: true });
-    }
+    const handleHashChange = () => {
+      setCurrentHash(window.location.hash);
+      const hash = window.location.hash;
+      if (hash) {
+        const el = document.querySelector(hash);
+        el?.setAttribute("tabindex", "-1");
+        el?.focus({ preventScroll: true });
+      }
+    };
+
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
 
-  if (isAdmin) {
-    // 📌 Muestra el Panel de Administración si está logueado
-    return <AdminPanel onLogout={() => setIsAdmin(false)} />;
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center text-xl text-[#38629F]">Cargando sesión...</div>;
+  }
+
+  // Lógica de "Routing" de la aplicación
+  if (currentHash === '#admin-login' && !isAdmin) {
+    return <AdminLogin />;
   }
   
-  // 📌 Muestra la aplicación normal si no es administrador
+  if (isAdmin) {
+    return <AdminPanel />;
+  }
+  
+  // Muestra la aplicación pública
   return (
     <div className="min-h-screen bg-[#F7E9DC] text-slate-800">
       <a
@@ -990,14 +1123,13 @@ export default function PerritosRescatadosApp() {
         Saltar al contenido
       </a>
 
-      {/* Se pasa el estado y la función para que el Header pueda mostrar/cambiar el Login */}
-      <Header isAdmin={isAdmin} onLoginToggle={setIsAdmin} />
+      <Header />
 
       <main id="main">
         <Hero />
         <Adopciones />
         <Transitos />
-        {/* 📌 CAMBIO DE ORDEN: Estadísticas movida aquí */}
+        {/* 📌 Orden solicitado: Estadísticas después de Tránsitos */}
         <Estadisticas /> 
         <Tienda/>        
         <Colabora />
