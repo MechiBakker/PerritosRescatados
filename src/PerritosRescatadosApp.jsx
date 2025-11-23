@@ -1,126 +1,176 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import InstagramCarousel from "./InstagramCarousel";
+import InstagramCarousel from "./InstagramCarousel"; // Asumo que este componente sigue siendo útil
+// import Login from "./Login"; // En una app real, este se importaría aparte
+// import AdminPanel from "./AdminPanel"; // En una app real, este se importaría aparte
 
+/* ================= SIMULACIÓN DE DATOS DINÁMICOS (Backend) ================= */
+// Función de simulación para cargar datos de adopciones
+const fetchMascotas = () => {
+  return [
+    { id: 1, name: "Max", age: "2 años", desc: "Perro muy juguetón, ideal para familias activas.", img: "/img/perro1.jpg", link: "https://www.instagram.com/p/mascota1/" },
+    { id: 2, name: "Luna", age: "6 meses", desc: "Cachorra tímida, necesita un hogar con mucha paciencia.", img: "/img/perro2.jpg", link: "https://www.instagram.com/p/mascota2/" },
+    { id: 3, name: "Coco", age: "5 años", desc: "Gato tranquilo, busca un lugar para descansar y recibir mimos.", img: "/img/gato1.jpg", link: "https://www.instagram.com/p/mascota3/" },
+    { id: 4, name: "Toby", age: "1 año", desc: "Energético, necesita mucho ejercicio y espacio para correr.", img: "/img/perro3.jpg", link: "https://www.instagram.com/p/mascota4/" },
+  ];
+};
+
+// Función de simulación para cargar datos de la tienda
+const fetchProductos = () => {
+  return [
+    { id: 1, nombre: "Remeras", img: "/img/remera.jpg", precio: "25.000", hasSizes: true, mpUrl: "https://link-mp-remeras" },
+    { id: 2, nombre: "Totebags", img: "/img/totebag.jpg", precio: "13.000", hasSizes: false, mpUrl: "https://link-mp-totebags" },
+    { id: 3, nombre: "Velas", img: "/img/vela.jpg", precio: "5.000", hasSizes: false, mpUrl: "https://link-mp-velas" },
+    { id: 4, nombre: "Comederos Marote", img: "/img/comederos.jpg", precio: "3.000 / 4.000", hasSizes: false, mpUrl: "https://link-mp-comederos" },
+    { id: 5, nombre: "Frisbees", img: "/img/frisbee.jpg", precio: "4.000", hasSizes: false, mpUrl: "https://link-mp-frisbees" },
+    { id: 6, nombre: "Cepillos", img: "/img/cepillo.jpg", precio: "2.500", hasSizes: false, mpUrl: "https://link-mp-cepillo" },
+  ];
+};
+
+// Función de simulación para cargar estadísticas desde Google Sheets
+const fetchEstadisticas = () => {
+    // Aquí tu backend llamaría al API de Google Sheets
+    return {
+        rescatesMes: '45',
+        adopcionesMes: '22',
+        rescatesHistorico: '1.280',
+    };
+};
+/* ================= FIN SIMULACIÓN ================= */
 
 
 /* ================= HEADER ================= */
-function Header() {
-  const [open, setOpen] = useState(false);
+// Se mantiene igual. Solo se añade el link al login simulado.
+function Header({ onLoginToggle, isAdmin }) {
+  const [open, setOpen] = useState(false);
 
-  useEffect(() => {
-    const onEsc = (e) => e.key === "Escape" && setOpen(false);
-    window.addEventListener("keydown", onEsc);
-    return () => window.removeEventListener("keydown", onEsc);
-  }, []);
+  useEffect(() => {
+    const onEsc = (e) => e.key === "Escape" && setOpen(false);
+    window.addEventListener("keydown", onEsc);
+    return () => window.removeEventListener("keydown", onEsc);
+  }, []);
 
-  return (
-    <header className="sticky top-0 z-50 bg-[#38629F] text-white shadow-md">
-      <div className="max-w-[1100px] mx-auto px-4 py-2 flex items-center justify-between">
-        {/* Logo */}
-        <a href="#" className="inline-flex items-center gap-2">
-          <img
-            src="/img/Logo1.jpg"
-            alt="Perritos Rescatados"
-            className="h-10 w-auto drop-shadow"
-            loading="lazy"
-            decoding="async"
-            onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/40x40/38629F/FFFFFF?text=PR"; }}
-          />
-        </a>
+  return (
+    <header className="sticky top-0 z-50 bg-[#38629F] text-white shadow-md">
+      <div className="max-w-[1100px] mx-auto px-4 py-2 flex items-center justify-between">
+        {/* Logo */}
+        <a href="#" className="inline-flex items-center gap-2">
+          <img
+            src="/img/Logo1.jpg"
+            alt="Perritos Rescatados"
+            className="h-10 w-auto drop-shadow"
+            loading="lazy"
+            decoding="async"
+            onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/40x40/38629F/FFFFFF?text=PR"; }}
+          />
+        </a>
 
-        {/* Botón hamburguesa en mobile */}
-        <button
-          className="lg:hidden text-2xl px-2 py-1 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
-          aria-expanded={open}
-          aria-controls="primary-nav"
-          aria-label={open ? "Cerrar menú" : "Abrir menú"}
-          onClick={() => setOpen((v) => !v)}
-        >
-          ☰
-        </button>
+        {/* Botón hamburguesa en mobile */}
+        <button
+          className="lg:hidden text-2xl px-2 py-1 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+          aria-expanded={open}
+          aria-controls="primary-nav"
+          aria-label={open ? "Cerrar menú" : "Abrir menú"}
+          onClick={() => setOpen((v) => !v)}
+        >
+          ☰
+        </button>
 
-        {/* Menú en desktop */}
-        <nav
-          id="primary-nav"
-          className="hidden lg:flex gap-6 text-sm font-bold"
-        >
-          <a
-            className="hover:text-[#F7E9DC] transition-colors"
-            href="#quienes-somos"
-          >
-            ¿Quiénes somos?
-          </a>
-          <a
-            className="hover:text-[#F7E9DC] transition-colors"
-            href="#adopciones"
-          >
-            Adopciones
-          </a>
-          <a
-            className="hover:text-[#F7E9DC] transition-colors"
-            href="#transitos"
-          >
-            Tránsitos
-          </a>
+        {/* Menú en desktop */}
+        <nav
+          id="primary-nav"
+          className="hidden lg:flex gap-6 text-sm font-bold"
+        >
+          <a
+            className="hover:text-[#F7E9DC] transition-colors"
+            href="#quienes-somos"
+          >
+            ¿Quiénes somos?
+          </a>
+          <a
+            className="hover:text-[#F7E9DC] transition-colors"
+            href="#adopciones"
+          >
+            Adopciones
+          </a>
+          <a
+            className="hover:text-[#F7E9DC] transition-colors"
+            href="#transitos"
+          >
+            Tránsitos
+          </a>
           <a
             className="hover:text-[#F7E9DC] transition-colors"
             href="#tienda"
             >
               Tienda
             </a>
-          <a
-            className="hover:text-[#F7E9DC] transition-colors"
-            href="#colabora"
-          >
-            Colaborá
-          </a>
-        </nav>
-      </div>
+          <a
+            className="hover:text-[#F7E9DC] transition-colors"
+            href="#colabora"
+          >
+            Colaborá
+          </a>
+           {/* Botón Admin - Simulación */}
+           <button
+            onClick={() => onLoginToggle(!isAdmin)}
+            className="hover:text-[#F7E9DC] transition-colors focus:outline-none text-xs font-bold"
+            aria-label={isAdmin ? "Cerrar sesión de Admin" : "Iniciar sesión de Admin"}
+          >
+            {isAdmin ? "Admin (Salir)" : "Login"}
+          </button>
+        </nav>
+      </div>
 
-      {/* Menú overlay en mobile */}
-      <nav
-        className={`lg:hidden fixed inset-0 bg-[#38629F] flex flex-col items-center justify-center gap-6 text-lg font-semibold transform transition-transform duration-300 ${
-          open ? "translate-x-0" : "translate-x-full"
-        }`}
-      >
-        <a
-          href="#quienes-somos"
-          className="hover:text-[#F7E9DC]"
-          onClick={() => setOpen(false)}
-        >
-          ¿Quiénes somos?
-        </a>
-        <a
-          href="#adopciones"
-          className="hover:text-[#F7E9DC]"
-          onClick={() => setOpen(false)}
-        >
-          Adopciones
-        </a>
-        <a
-          href="#transitos"
-          className="hover:text-[#F7E9DC]"
-          onClick={() => setOpen(false)}
-        >
-          Tránsitos
-        </a>
+      {/* Menú overlay en mobile */}
+      <nav
+        className={`lg:hidden fixed inset-0 bg-[#38629F] flex flex-col items-center justify-center gap-6 text-lg font-semibold transform transition-transform duration-300 ${
+          open ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
         <a
-          href="#tienda"
-          className="hover:text-[#F7E9DC]"
-          onClick={() => setOpen(false)}
-        >
-          Tienda
-        </a>
-        <a
-          href="#colabora"
-          className="hover:text-[#F7E9DC]"
-          onClick={() => setOpen(false)}
-        >
-          Colaborá
-        </a>
-      </nav>
-    </header>
-  );
+          href="#quienes-somos"
+          className="hover:text-[#F7E9DC]"
+          onClick={() => setOpen(false)}
+        >
+          ¿Quiénes somos?
+        </a>
+        <a
+          href="#adopciones"
+          className="hover:text-[#F7E9DC]"
+          onClick={() => setOpen(false)}
+        >
+          Adopciones
+        </a>
+        <a
+          href="#transitos"
+          className="hover:text-[#F7E9DC]"
+          onClick={() => setOpen(false)}
+        >
+          Tránsitos
+        </a>
+        <a
+          href="#tienda"
+          className="hover:text-[#F7E9DC]"
+          onClick={() => setOpen(false)}
+        >
+          Tienda
+        </a>
+        <a
+          href="#colabora"
+          className="hover:text-[#F7E9DC]"
+          onClick={() => setOpen(false)}
+        >
+          Colaborá
+        </a>
+        <button
+            onClick={() => { onLoginToggle(!isAdmin); setOpen(false); }}
+            className="mt-4 text-sm hover:text-[#F7E9DC] focus:outline-none"
+          >
+            {isAdmin ? "Admin (Salir)" : "Login"}
+          </button>
+      </nav>
+    </header>
+  );
 }
 
 
@@ -142,6 +192,7 @@ function useYear() {
 
 /* ================= SECTIONS ================= */
 function Hero() {
+  // Se mantiene sin cambios
   return (
     <section id="quienes-somos" className="py-16 bg-[#F7E9DC]">
       <div className="max-w-[1100px] mx-auto px-4 grid md:grid-cols-2 gap-8 items-center">
@@ -182,15 +233,21 @@ function Hero() {
   );
 }
 
-function CarouselPets() {
+// 📌 Nuevo componente de Carrusel para Adopciones
+function CarouselPetsDynamic({ mascotas }) {
   const trackRef = useRef(null);
   const scrollByCard = (dir) => {
     const el = trackRef.current;
     if (!el) return;
     const card = el.querySelector("[data-card]");
+    // Calcula el desplazamiento: ancho de la tarjeta + gap (16px)
     const delta = card ? card.getBoundingClientRect().width + 16 : 320;
     el.scrollBy({ left: dir * delta, behavior: "smooth" });
   };
+
+  if (mascotas.length === 0) {
+      return <p className="text-center text-slate-500 mt-5">¡No hay perritos o gatitos en adopción por el momento! 💔</p>;
+  }
 
   return (
     <div className="relative mt-6">
@@ -208,7 +265,7 @@ function CarouselPets() {
         className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory px-1 scrollbar-hide relative"
         role="region"
       >
-        {PETS.map((p) => (
+        {mascotas.map((p) => (
           <article
             key={p.id}
             data-card
@@ -218,11 +275,14 @@ function CarouselPets() {
               src={p.img}
               alt={p.name}
               className="w-full h-48 object-cover rounded-t-2xl"
+              // Agregando manejo de error para imágenes dinámicas
+              onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/260x192/D9E3F1/38629F?text=Foto"; }}
             />
             <div className="p-4">
               <h3 className="text-[#38629F] font-semibold text-lg">
                 {p.name}
               </h3>
+              <p className="text-slate-600 text-sm mt-1">**Edad:** {p.age}</p>
               <p className="text-slate-600 text-sm mt-1">{p.desc}</p>
               <a
                 href={p.link}
@@ -230,11 +290,12 @@ function CarouselPets() {
                 rel="noopener noreferrer"
                 className="inline-flex mt-3 items-center justify-center px-3 py-2 rounded-full text-white bg-[#38629F] hover:brightness-95 text-sm"
               >
-                Ver en Instagram
+                Ver más
               </a>
             </div>
           </article>
         ))}
+        {/* Sombra al final del carrusel */}
         <div className="pointer-events-none absolute right-0 top-0 h-full w-12 bg-gradient-to-l from-white to-transparent" />
       </div>
 
@@ -250,7 +311,17 @@ function CarouselPets() {
   );
 }
 
+
 function Adopciones() {
+  // 📌 Carga de datos dinámica de mascotas
+  const [mascotas, setMascotas] = useState([]);
+  
+  useEffect(() => {
+    // Aquí se reemplazaría por tu llamada a la API
+    // fetch('/api/mascotas-adopcion').then(res => res.json()).then(setMascotas);
+    setMascotas(fetchMascotas());
+  }, []);
+
   return (
     <section id="adopciones" className="py-16 bg-white">
       <div className="max-w-[1100px] mx-auto px-4">
@@ -297,12 +368,12 @@ function Adopciones() {
 
         <br />
 
-        {/* Carrusel de Instagram */}
+        {/* 📌 Reemplazando el carrusel de Instagram por el Carrusel Dinámico de Mascotas */}
           <div className="mt-10">
             <h3 className="text-[#38629F] text-xl font-semibold text-center mb-3">
-              🐾 Últimos posteos en Instagram
+              🐾 Nuestros rescatados buscando hogar
             </h3>
-            <InstagramCarousel />
+            <CarouselPetsDynamic mascotas={mascotas} /> 
           </div>
 
         <br />
@@ -313,6 +384,7 @@ function Adopciones() {
 
 
 function Transitos() {
+  // Se mantiene sin cambios
   return (
     <section id="transitos" className="py-16 bg-[#eff4fb]">
       <div className="max-w-[1100px] mx-auto px-4 grid md:grid-cols-2 gap-8 items-start">
@@ -367,9 +439,101 @@ function Transitos() {
   );
 }
 
+// 📌 Componente de Formulario de Compra de Producto
+function BuyForm({ item }) {
+  const [quantity, setQuantity] = useState(1);
+  const [size, setSize] = useState(item.hasSizes ? '' : 'N/A');
+  const [loading, setLoading] = useState(false);
+
+  const handleBuy = async () => {
+    if (item.hasSizes && !size) {
+      alert("Por favor, selecciona un talle.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // 💡 Aquí se reemplazaría por tu llamada al API de Mercado Pago
+      /*
+      const response = await fetch('/api/mercadopago/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productId: item.id,
+          productName: item.nombre,
+          price: item.precio, // Idealmente enviar el precio como número desde el backend
+          quantity,
+          size,
+        }),
+      });
+      const data = await response.json();
+      
+      if (data.checkoutUrl) {
+        window.open(data.checkoutUrl, '_blank');
+      } else {
+        alert("Error al generar el link de pago.");
+      }
+      */
+
+      // SIMULACIÓN: Usar el URL estático proporcionado en la simulación
+      console.log(`Simulando compra de ${quantity}x ${item.nombre} (Talle: ${size || 'N/A'}). Redirigiendo a: ${item.mpUrl}`);
+      window.open(item.mpUrl, '_blank');
+
+    } catch (error) {
+      console.error("Error en la compra:", error);
+      alert("Hubo un error al procesar la compra. Intenta de nuevo.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  return (
+    <div className="mt-3">
+      {item.hasSizes && (
+        <select 
+          value={size} 
+          onChange={(e) => setSize(e.target.value)} 
+          className="mt-2 block w-full p-2 border border-slate-300 rounded text-sm text-slate-700"
+        >
+          <option value="">Selecciona Talle</option>
+          <option value="S">S</option>
+          <option value="M">M</option>
+          <option value="L">L</option>
+          <option value="XL">XL</option>
+        </select>
+      )}
+
+      <input
+        type="number"
+        value={quantity}
+        min="1"
+        onChange={(e) => setQuantity(Math.max(1, Number(e.target.value)))} // Asegura que sea al menos 1
+        className="mt-2 block w-full p-2 border border-slate-300 rounded text-center text-sm text-slate-700"
+      />
+
+      <button
+        onClick={handleBuy}
+        disabled={loading || (item.hasSizes && !size)}
+        className="mt-3 inline-block px-4 py-2 rounded-full text-white bg-[#38629F] hover:brightness-95 text-sm font-semibold disabled:bg-gray-400"
+      >
+        {loading ? 'Procesando...' : 'Comprar'}
+      </button>
+    </div>
+  );
+}
+
+
 function Tienda() {
+  const [productos, setProductos] = useState([]);
   const trackRef = useRef(null);
   const autoScrollRef = useRef(null);
+
+  useEffect(() => {
+    // 📌 Carga de datos dinámica de productos
+    // fetch('/api/productos').then(res => res.json()).then(setProductos);
+    setProductos(fetchProductos());
+  }, []);
 
   const scrollByCard = (dir) => {
     const el = trackRef.current;
@@ -379,19 +543,10 @@ function Tienda() {
     el.scrollBy({ left: dir * delta, behavior: "smooth" });
   };
 
-  const productos = [
-    { nombre: "Remeras", img: "/img/remera.jpg", precio: "$25.000" },
-    { nombre: "Totebags", img: "/img/totebag.jpg", precio: "$13.000" },
-    { nombre: "Velas", img: "/img/vela.jpg", precio: "$5.000" },
-    { nombre: "Comederos Marote", img: "/img/comederos.jpg", precio: "$3.000 / $4.000" },
-    { nombre: "Frisbees", img: "/img/frisbee.jpg", precio: "$4.000" },
-    { nombre: "Cepillos", img: "/img/cepillo.jpg", precio: "$2.500" },
-  ];
-
   /* === AUTOPLAY === */
   useEffect(() => {
     const el = trackRef.current;
-    if (!el) return;
+    if (!el || productos.length === 0) return;
 
     const handleUserInteraction = () => {
       // Detiene autoplay al tocar o arrastrar
@@ -416,10 +571,10 @@ function Tienda() {
 
     return () => {
       clearInterval(autoScrollRef.current);
-      el.removeEventListener("touchstart", handleUserInteraction);
-      el.removeEventListener("mousedown", handleUserInteraction);
+      el?.removeEventListener("touchstart", handleUserInteraction);
+      el?.removeEventListener("mousedown", handleUserInteraction);
     };
-  }, []);
+  }, [productos]);
 
   return (
     <section id="tienda" className="py-16 bg-[#F7E9DC]">
@@ -431,103 +586,137 @@ function Tienda() {
         <p className="text-slate-600 text-center mb-10">
           Todo lo recaudado se destina a la atención veterinaria, alimento y cuidados de nuestros rescatados. 💕
         </p>
-
-        {/* Carrusel en mobile */}
-        <div className="relative md:hidden">
-          <button
-            type="button"
-            onClick={() => scrollByCard(-1)}
-            className="absolute left-1 top-1/2 -translate-y-1/2 bg-white text-[#38629F] w-8 h-8 rounded-full shadow hover:shadow-md z-10"
-          >
-            «
-          </button>
-
-          <div
-            ref={trackRef}
-            className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory scrollbar-hide px-1"
-          >
-            {productos.map((item, i) => (
-              <article
-                key={i}
-                data-card
-                className="min-w-[240px] max-w-[260px] snap-start bg-white rounded-2xl shadow hover:shadow-lg transition-shadow overflow-hidden flex flex-col"
-              >
-                <img
-                  src={item.img}
-                  alt={item.nombre}
-                  className="w-full h-64 object-cover"
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src = `https://placehold.co/300x300/eff4fb/38629F?text=${item.nombre}`;
-                  }}
-                />
-                <div className="p-4 text-center">
-                  <h3 className="text-[#38629F] font-semibold text-lg">
-                    {item.nombre}
-                  </h3>
-                  <p className="text-slate-600 font-medium mt-1">{item.precio}</p>
-                  <a
-                    href="https://wa.me/5492216155465"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-3 inline-block px-4 py-2 rounded-full text-white bg-[#38629F] hover:brightness-95 text-sm font-semibold"
-                  >
-                    Comprar
-                  </a>
-                </div>
-              </article>
-            ))}
-          </div>
-
-          <button
-            type="button"
-            onClick={() => scrollByCard(1)}
-            className="absolute right-1 top-1/2 -translate-y-1/2 bg-white text-[#38629F] w-8 h-8 rounded-full shadow hover:shadow-md z-10"
-          >
-            »
-          </button>
-        </div>
-
-        {/* Grilla normal en desktop */}
-        <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {productos.map((item, i) => (
-            <article
-              key={i}
-              className="bg-white rounded-2xl shadow hover:shadow-lg transition-shadow overflow-hidden flex flex-col"
-            >
-              <img
-                src={item.img}
-                alt={item.nombre}
-                className="w-full h-80 object-cover"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = `https://placehold.co/300x300/eff4fb/38629F?text=${item.nombre}`;
-                }}
-              />
-              <div className="p-4 text-center">
-                <h3 className="text-[#38629F] font-semibold text-lg">
-                  {item.nombre}
-                </h3>
-                <p className="text-slate-600 font-medium mt-1">{item.precio}</p>
-                <a
-                  href="https://wa.me/5492216155465"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-3 inline-block px-4 py-2 rounded-full text-white bg-[#38629F] hover:brightness-95 text-sm font-semibold"
+        
+        {productos.length === 0 ? (
+            <p className="text-center text-slate-500">Cargando productos...</p>
+        ) : (
+            <>
+              {/* Carrusel en mobile */}
+              <div className="relative md:hidden">
+                {/* Flechas de control */}
+                <button
+                  type="button"
+                  onClick={() => scrollByCard(-1)}
+                  className="absolute left-1 top-1/2 -translate-y-1/2 bg-white text-[#38629F] w-8 h-8 rounded-full shadow hover:shadow-md z-10"
                 >
-                  Comprar
-                </a>
+                  «
+                </button>
+
+                <div
+                  ref={trackRef}
+                  className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory scrollbar-hide px-1"
+                >
+                  {productos.map((item, i) => (
+                    <article
+                      key={item.id}
+                      data-card
+                      className="min-w-[240px] max-w-[260px] snap-start bg-white rounded-2xl shadow hover:shadow-lg transition-shadow overflow-hidden flex flex-col"
+                    >
+                      <img
+                        src={item.img}
+                        alt={item.nombre}
+                        className="w-full h-64 object-cover"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = `https://placehold.co/300x300/eff4fb/38629F?text=${item.nombre}`;
+                        }}
+                      />
+                      <div className="p-4 text-center">
+                        <h3 className="text-[#38629F] font-semibold text-lg">
+                          {item.nombre}
+                        </h3>
+                        <p className="text-slate-600 font-medium mt-1">${item.precio}</p>
+                        {/* 📌 Nuevo Formulario de Compra */}
+                        <BuyForm item={item} /> 
+                      </div>
+                    </article>
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => scrollByCard(1)}
+                  className="absolute right-1 top-1/2 -translate-y-1/2 bg-white text-[#38629F] w-8 h-8 rounded-full shadow hover:shadow-md z-10"
+                >
+                  »
+                </button>
               </div>
-            </article>
-          ))}
-        </div>
+
+              {/* Grilla normal en desktop */}
+              <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {productos.map((item, i) => (
+                  <article
+                    key={item.id}
+                    className="bg-white rounded-2xl shadow hover:shadow-lg transition-shadow overflow-hidden flex flex-col"
+                  >
+                    <img
+                      src={item.img}
+                      alt={item.nombre}
+                      className="w-full h-80 object-cover"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = `https://placehold.co/300x300/eff4fb/38629F?text=${item.nombre}`;
+                      }}
+                    />
+                    <div className="p-4 text-center">
+                      <h3 className="text-[#38629F] font-semibold text-lg">
+                        {item.nombre}
+                      </h3>
+                      <p className="text-slate-600 font-medium mt-1">${item.precio}</p>
+                      {/* 📌 Nuevo Formulario de Compra */}
+                      <BuyForm item={item} />
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </>
+        )}
       </div>
     </section>
   );
 }
 
+// 📌 Nuevo Componente de Estadísticas
+function StatCard({ title, value }) {
+    return (
+      <div className="bg-white p-6 rounded-xl shadow-lg border border-[#38629F]/20">
+        <p className="text-5xl font-extrabold text-[#EA4E4E] mb-2">{value}</p>
+        <h3 className="text-lg font-medium text-slate-700">{title}</h3>
+      </div>
+    );
+}
+
+function Estadisticas() {
+    const [stats, setStats] = useState({
+        rescatesMes: '...',
+        adopcionesMes: '...',
+        rescatesHistorico: '...'
+    });
+
+    useEffect(() => {
+        // 📌 Carga de datos dinámica de estadísticas desde el backend/Google Sheets
+        // fetch('/api/stats-google-sheets').then(res => res.json()).then(setStats);
+        setStats(fetchEstadisticas());
+    }, []);
+
+    return (
+        <section id="estadisticas" className="py-16 bg-[#eff4fb]">
+            <div className="max-w-[1100px] mx-auto px-4 text-center">
+                <h2 className="text-2xl md:text-3xl font-semibold text-[#38629F] mb-12">
+                    📈 Nuestro Impacto
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <StatCard title="Rescates del Mes" value={stats.rescatesMes} />
+                    <StatCard title="Adopciones del Mes" value={stats.adopcionesMes} />
+                    <StatCard title="Rescates Históricos" value={stats.rescatesHistorico} />
+                </div>
+            </div>
+        </section>
+    );
+}
 
 function Colabora() {
+  // Se mantiene sin cambios
   return (
     <section
       id="colabora"
@@ -544,7 +733,6 @@ function Colabora() {
         <br></br>
 
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-          {/* DONAR AHORA: URL COMPLETA bla bla*/}
           <a
             href="https://link.mercadopago.com.ar/perritosrescatados1"
             target="_blank"
@@ -554,7 +742,6 @@ function Colabora() {
             Donar ahora
            </a>
           
-          {/* Mismo cambio para el botón de Suscripción bla bla */}
           <a
             href="https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=0335e4d01d024164a176c82074e2b61b"
             target="_blank"
@@ -570,6 +757,7 @@ function Colabora() {
 }
 
 function Footer() {
+  // Se mantiene sin cambios
   const year = useYear();
   return (
     <footer className="bg-[#EA4E4E] text-white mt-12">
@@ -642,38 +830,84 @@ function Footer() {
   );
 }
 
+// 📌 Nuevo componente simulado de Panel de Administración (ejemplo)
+function AdminPanel({ onLogout }) {
+    return (
+        <div className="max-w-[1100px] mx-auto px-4 py-16 min-h-screen">
+            <h1 className="text-4xl font-bold text-[#38629F] mb-8">Panel de Administración 🔐</h1>
+            <p className="text-slate-700 mb-6">Aquí puedes gestionar el contenido dinámico de la página.</p>
+            
+            <div className="grid md:grid-cols-3 gap-6">
+                <div className="bg-white p-6 rounded-xl shadow-md border-t-4 border-[#38629F]">
+                    <h2 className="text-xl font-semibold mb-3">Gestión de Adopciones</h2>
+                    <p className="text-sm text-slate-600">Agregar, editar o eliminar mascotas disponibles para adopción.</p>
+                    <button className="mt-4 text-white bg-green-500 px-4 py-2 rounded text-sm hover:bg-green-600">Abrir Panel</button>
+                </div>
+                <div className="bg-white p-6 rounded-xl shadow-md border-t-4 border-[#38629F]">
+                    <h2 className="text-xl font-semibold mb-3">Gestión de Tienda</h2>
+                    <p className="text-sm text-slate-600">Administrar stock, precios, talles y URL de Mercado Pago de los productos.</p>
+                    <button className="mt-4 text-white bg-green-500 px-4 py-2 rounded text-sm hover:bg-green-600">Abrir Panel</button>
+                </div>
+                <div className="bg-white p-6 rounded-xl shadow-md border-t-4 border-[#38629F]">
+                    <h2 className="text-xl font-semibold mb-3">Actualizar Estadísticas</h2>
+                    <p className="text-sm text-slate-600">Sincronizar o editar manualmente los números de rescates/adopciones (Google Sheets).</p>
+                    <button className="mt-4 text-white bg-green-500 px-4 py-2 rounded text-sm hover:bg-green-600">Abrir Panel</button>
+                </div>
+            </div>
+
+            <button
+                onClick={onLogout}
+                className="mt-10 inline-flex items-center justify-center px-5 py-3 rounded-full font-semibold text-white bg-[#EA4E4E] hover:brightness-95"
+            >
+                Cerrar Sesión
+            </button>
+        </div>
+    );
+}
 
 /* ================= APP ================= */
 export default function PerritosRescatadosApp() {
-  useEffect(() => {
-    const hash = window.location.hash;
-    if (hash) {
-      const el = document.querySelector(hash);
-      el?.setAttribute("tabindex", "-1");
-      el?.focus({ preventScroll: true });
-    }
-  }, []);
+  // 📌 SIMULACIÓN DE AUTENTICACIÓN
+  const [isAdmin, setIsAdmin] = useState(false);
 
-  return (
-    <div className="min-h-screen bg-[#F7E9DC] text-slate-800">
-      <a
-        href="#main"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:bg-black focus:text-white focus:px-3 focus:py-2 focus:rounded"
-      >
-        Saltar al contenido
-      </a>
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash) {
+      const el = document.querySelector(hash);
+      el?.setAttribute("tabindex", "-1");
+      el?.focus({ preventScroll: true });
+    }
+  }, []);
 
-      <Header />
+  if (isAdmin) {
+    // 📌 Muestra el Panel de Administración si está logueado
+    return <AdminPanel onLogout={() => setIsAdmin(false)} />;
+  }
+  
+  // 📌 Muestra la aplicación normal si no es administrador
+  return (
+    <div className="min-h-screen bg-[#F7E9DC] text-slate-800">
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:bg-black focus:text-white focus:px-3 focus:py-2 focus:rounded"
+      >
+        Saltar al contenido
+      </a>
 
-      <main id="main">
-        <Hero />
-        <Adopciones />
-        <Transitos />
+      {/* Se pasa el estado y la función para que el Header pueda mostrar/cambiar el Login */}
+      <Header isAdmin={isAdmin} onLoginToggle={setIsAdmin} />
+
+      <main id="main">
+        <Hero />
+        <Adopciones />
+        <Transitos />
         <Tienda/>        
+        {/* 📌 SECCIÓN DE ESTADÍSTICAS AGREGADA AQUÍ */}
+        <Estadisticas /> 
         <Colabora />
-      </main>
+      </main>
 
-      <Footer />
-    </div>
-  );
+      <Footer />
+    </div>
+  );
 }
