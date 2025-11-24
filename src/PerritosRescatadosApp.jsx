@@ -49,6 +49,25 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 const AuthContext = createContext();
+useEffect(() => {
+  const unsub = onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      setCurrentUser(null);
+      setIsAdmin(false);
+      setLoading(false);
+      return;
+    }
+
+    const token = await user.getIdTokenResult(true);
+    const isAdminUser = token.claims.admin === true;
+
+    setCurrentUser(user);
+    setIsAdmin(isAdminUser);
+    setLoading(false);
+  });
+
+  return () => unsub();
+}, []);
 
 // Hook personalizado para simular (y luego integrar) Firebase Auth
 const useFirebaseAuth = () => {
@@ -85,67 +104,35 @@ return () => unsub();
     // return () => unsubscribe(); // Limpieza del listener de Firebase
   }, []);
 
-  const loginAdmin = async (email, password) => {
-    setLoading(true);
-    try {
-      // 📌 REEMPLAZAR con:
-      // const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      // const idToken = await userCredential.user.getIdTokenResult();
-      // const isAdminUser = idToken.claims.admin === true; // Necesitas configurar un custom claim 'admin: true'
-      
-      // --- SIMULACIÓN DE LOGIN ---
-     const loginAdmin = async (email, password) => {
-      setLoading(true);
+const loginAdmin = async (email, password) => {
+  setLoading(true);
 
-      try {
-        // Iniciar sesión con Firebase
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+  try {
+    // LOGIN REAL CON FIREBASE
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
 
-        // Obtener los custom claims
-        const token = await userCredential.user.getIdTokenResult(true);
-        const isAdminUser = token.claims.admin === true;
+    // Obtener claims del usuario
+    const token = await userCredential.user.getIdTokenResult(true);
+    const isAdminUser = token.claims.admin === true;
 
-        if (!isAdminUser) {
-          await signOut(auth);
-          return { success: false, error: "Este usuario no tiene permisos de administrador." };
-        }
-
-        setCurrentUser(userCredential.user);
-        setIsAdmin(true);
-
-        return { success: true, user: userCredential.user };
-
-      } catch (error) {
-        return { success: false, error: error.message };
-
-      } finally {
-        setLoading(false);
-      }
-    };
-
-
-      // ----------------------------
-
-    } catch (error) {
-      console.error("Error de login:", error.message);
-      setIsAdmin(false);
-      return { success: false, error: error.message };
-    } finally {
-      setLoading(false);
+    if (!isAdminUser) {
+      await signOut(auth);
+      return { success: false, error: "Este usuario no tiene permisos de administrador." };
     }
-  };
 
-  const logout = async () => {
-    // 📌 REEMPLAZAR con: await signOut(auth); 
-    await signOut(auth);
-    setCurrentUser(null);
-    setIsAdmin(false);
-    window.location.hash = '#';
+    setCurrentUser(userCredential.user);
+    setIsAdmin(true);
 
-  };
+    return { success: true, user: userCredential.user };
 
-  return { currentUser, isAdmin, loading, loginAdmin, logout };
+  } catch (error) {
+    return { success: false, error: error.message };
+
+  } finally {
+    setLoading(false);
+  }
 };
+}
 
 export const useAuth = () => useContext(AuthContext);
 
