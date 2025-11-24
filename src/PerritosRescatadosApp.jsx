@@ -61,12 +61,25 @@ const useFirebaseAuth = () => {
     // 🚨 Aquí deberías usar onAuthStateChanged(auth, (user) => { ... })
     
     // --- SIMULACIÓN DE onAuthStateChanged (Para que funcione sin Firebase real) ---
-    const storedAdmin = localStorage.getItem('is_admin') === 'true';
-    if (storedAdmin) {
-        setCurrentUser({ uid: 'admin_uid_simulated', email: 'admin@example.com' });
-        setIsAdmin(true);
-    }
+    const unsub = onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    setCurrentUser(null);
+    setIsAdmin(false);
     setLoading(false);
+    return;
+  }
+
+  // Obtener custom claims (admin)
+  const token = await user.getIdTokenResult(true);
+  const isAdminUser = token.claims.admin === true;
+
+  setCurrentUser(user);
+  setIsAdmin(isAdminUser);
+  setLoading(false);
+});
+
+return () => unsub();
+
     // ----------------------------------------------------------------------------
 
     // return () => unsubscribe(); // Limpieza del listener de Firebase
@@ -81,15 +94,30 @@ const useFirebaseAuth = () => {
       // const isAdminUser = idToken.claims.admin === true; // Necesitas configurar un custom claim 'admin: true'
       
       // --- SIMULACIÓN DE LOGIN ---
-      if (email === "admin@perritos.com" && password === "password_segura") {
-        const user = { uid: 'admin_uid_simulated', email };
-        setCurrentUser(user);
-        setIsAdmin(true);
-        localStorage.setItem('is_admin', 'true'); // Simular persistencia
-        return { success: true, user };
-      } else {
-        throw new Error("Credenciales inválidas.");
-      }
+      const loginAdmin = async (email, password) => {
+  setLoading(true);
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+
+    const token = await userCredential.user.getIdTokenResult(true);
+
+    if (token.claims.admin === true) {
+      setCurrentUser(userCredential.user);
+      setIsAdmin(true);
+      return { success: true, user: userCredential.user };
+    } else {
+      await signOut(auth);
+      return { success: false, error: "Este usuario no tiene permisos de administrador." };
+    }
+
+  } catch (error) {
+    console.error("Error de login:", error.message);
+    return { success: false, error: error.message };
+  } finally {
+    setLoading(false);
+  }
+};
+
       // ----------------------------
 
     } catch (error) {
@@ -103,10 +131,11 @@ const useFirebaseAuth = () => {
 
   const logout = async () => {
     // 📌 REEMPLAZAR con: await signOut(auth); 
+    await signOut(auth);
     setCurrentUser(null);
     setIsAdmin(false);
-    localStorage.removeItem('is_admin'); 
     window.location.hash = '#';
+
   };
 
   return { currentUser, isAdmin, loading, loginAdmin, logout };
