@@ -35,6 +35,15 @@ import {
 } from "firebase/auth";
 
 // Configuración de Firebase Client usando variables de entorno PÚBLICAS
+/* ================= FIREBASE CLIENT SETUP ================= */
+import { initializeApp } from "firebase/app";
+import { 
+    getAuth, 
+    signInWithEmailAndPassword, 
+    signOut, 
+    onAuthStateChanged 
+} from "firebase/auth";
+
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -44,102 +53,80 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-// Inicializa Firebase y Auth
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
+/* ================= AUTH CONTEXT ================= */
 const AuthContext = createContext();
-useEffect(() => {
-  const unsub = onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-      setCurrentUser(null);
-      setIsAdmin(false);
-      setLoading(false);
-      return;
-    }
 
-    const token = await user.getIdTokenResult(true);
-    const isAdminUser = token.claims.admin === true;
-
-    setCurrentUser(user);
-    setIsAdmin(isAdminUser);
-    setLoading(false);
-  });
-
-  return () => unsub();
-}, []);
-
-// Hook personalizado para simular (y luego integrar) Firebase Auth
+/* ================= CUSTOM HOOK ================= */
 const useFirebaseAuth = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // 📌 useEffect: Conexión real a onAuthStateChanged de Firebase Auth
+  // Listener real de Firebase Auth
   useEffect(() => {
-    // 🚨 Aquí deberías usar onAuthStateChanged(auth, (user) => { ... })
-    
-    // --- SIMULACIÓN DE onAuthStateChanged (Para que funcione sin Firebase real) ---
     const unsub = onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    setCurrentUser(null);
-    setIsAdmin(false);
-    setLoading(false);
-    return;
-  }
+      if (!user) {
+        setCurrentUser(null);
+        setIsAdmin(false);
+        setLoading(false);
+        return;
+      }
 
-  // Obtener custom claims (admin)
-  const token = await user.getIdTokenResult(true);
-  const isAdminUser = token.claims.admin === true;
+      const token = await user.getIdTokenResult(true);
+      setCurrentUser(user);
+      setIsAdmin(token.claims.admin === true);
+      setLoading(false);
+    });
 
-  setCurrentUser(user);
-  setIsAdmin(isAdminUser);
-  setLoading(false);
-});
-
-return () => unsub();
-
-    // ----------------------------------------------------------------------------
-
-    // return () => unsubscribe(); // Limpieza del listener de Firebase
+    return () => unsub();
   }, []);
 
-const loginAdmin = async (email, password) => {
-  setLoading(true);
+  // LOGIN ADMIN
+  const loginAdmin = async (email, password) => {
+    setLoading(true);
 
-  try {
-    // LOGIN REAL CON FIREBASE
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const token = await userCredential.user.getIdTokenResult(true);
+      const isAdminUser = token.claims.admin === true;
 
-    // Obtener claims del usuario
-    const token = await userCredential.user.getIdTokenResult(true);
-    const isAdminUser = token.claims.admin === true;
+      if (!isAdminUser) {
+        await signOut(auth);
+        return { success: false, error: "Este usuario no tiene permisos de administrador." };
+      }
 
-    if (!isAdminUser) {
-      await signOut(auth);
-      return { success: false, error: "Este usuario no tiene permisos de administrador." };
+      setCurrentUser(userCredential.user);
+      setIsAdmin(true);
+
+      return { success: true, user: userCredential.user };
+
+    } catch (error) {
+      return { success: false, error: error.message };
+    } finally {
+      setLoading(false);
     }
+  };
 
-    setCurrentUser(userCredential.user);
-    setIsAdmin(true);
+  const logout = async () => {
+    await signOut(auth);
+    setCurrentUser(null);
+    setIsAdmin(false);
+  };
 
-    return { success: true, user: userCredential.user };
-
-  } catch (error) {
-    return { success: false, error: error.message };
-
-  } finally {
-    setLoading(false);
-  }
+  return { currentUser, isAdmin, loading, loginAdmin, logout };
 };
-}
 
+/* ================= AUTH PROVIDER ================= */
 export const useAuth = () => useContext(AuthContext);
 
 const AuthProvider = ({ children }) => {
-  const auth = useFirebaseAuth();
-  return <AuthContext.Provider value={auth}>{children}</AuthContext.Provider>;
+  const authState = useFirebaseAuth();
+  return <AuthContext.Provider value={authState}>{children}</AuthContext.Provider>;
 };
+
 /* ================= FIN FIREBASE AUTH CONTEXT ================= */
 
 
