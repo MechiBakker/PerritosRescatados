@@ -1,26 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState, useContext, createContext } from "react";
 // import InstagramCarousel from "./InstagramCarousel"; // No usado, se mantiene por si acaso
 
-/* ================= FIREBASE CLIENT SETUP & AUTH CONTEXT ================= */
-// 🚨 ATENCIÓN: Reemplaza estos imports con tus archivos de configuración reales.
-// Por ahora, usamos stubs de la librería de Firebase para estructurar el código.
-// import { initializeApp } from "firebase/app"; 
-// import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
-
-// Asumimos que tienes una configuración similar a la siguiente en un archivo 'firebase.js':
-/*
-const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-};
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-*/
-
 
 import AdminPanel from "../pages/admin";
 
