@@ -94,29 +94,35 @@ return () => unsub();
       // const isAdminUser = idToken.claims.admin === true; // Necesitas configurar un custom claim 'admin: true'
       
       // --- SIMULACIÓN DE LOGIN ---
-      const loginAdmin = async (email, password) => {
+     const loginAdmin = async (email, password) => {
   setLoading(true);
+
   try {
+    // Iniciar sesión con Firebase
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
 
+    // Obtener los custom claims
     const token = await userCredential.user.getIdTokenResult(true);
+    const isAdminUser = token.claims.admin === true;
 
-    if (token.claims.admin === true) {
-      setCurrentUser(userCredential.user);
-      setIsAdmin(true);
-      return { success: true, user: userCredential.user };
-    } else {
+    if (!isAdminUser) {
       await signOut(auth);
       return { success: false, error: "Este usuario no tiene permisos de administrador." };
     }
 
+    setCurrentUser(userCredential.user);
+    setIsAdmin(true);
+
+    return { success: true, user: userCredential.user };
+
   } catch (error) {
-    console.error("Error de login:", error.message);
     return { success: false, error: error.message };
+
   } finally {
     setLoading(false);
   }
 };
+
 
       // ----------------------------
 
