@@ -95,33 +95,33 @@ return () => unsub();
       
       // --- SIMULACIÓN DE LOGIN ---
      const loginAdmin = async (email, password) => {
-  setLoading(true);
+      setLoading(true);
 
-  try {
-    // Iniciar sesión con Firebase
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      try {
+        // Iniciar sesión con Firebase
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
 
-    // Obtener los custom claims
-    const token = await userCredential.user.getIdTokenResult(true);
-    const isAdminUser = token.claims.admin === true;
+        // Obtener los custom claims
+        const token = await userCredential.user.getIdTokenResult(true);
+        const isAdminUser = token.claims.admin === true;
 
-    if (!isAdminUser) {
-      await signOut(auth);
-      return { success: false, error: "Este usuario no tiene permisos de administrador." };
-    }
+        if (!isAdminUser) {
+          await signOut(auth);
+          return { success: false, error: "Este usuario no tiene permisos de administrador." };
+        }
 
-    setCurrentUser(userCredential.user);
-    setIsAdmin(true);
+        setCurrentUser(userCredential.user);
+        setIsAdmin(true);
 
-    return { success: true, user: userCredential.user };
+        return { success: true, user: userCredential.user };
 
-  } catch (error) {
-    return { success: false, error: error.message };
+      } catch (error) {
+        return { success: false, error: error.message };
 
-  } finally {
-    setLoading(false);
-  }
-};
+      } finally {
+        setLoading(false);
+      }
+    };
 
 
       // ----------------------------
