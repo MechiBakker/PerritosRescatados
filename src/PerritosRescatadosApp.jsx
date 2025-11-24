@@ -36,13 +36,6 @@ import {
 
 // Configuración de Firebase Client usando variables de entorno PÚBLICAS
 /* ================= FIREBASE CLIENT SETUP ================= */
-import { initializeApp } from "firebase/app";
-import { 
-    getAuth, 
-    signInWithEmailAndPassword, 
-    signOut, 
-    onAuthStateChanged 
-} from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
