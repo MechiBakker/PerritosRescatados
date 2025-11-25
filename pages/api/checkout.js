@@ -1,4 +1,4 @@
-import admin from "../lib/firebaseAdmin.js";
+import admin from "../../lib/firebaseAdmin.js";
 
 import MercadoPago from "mercadopago";
 

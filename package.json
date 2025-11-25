@@ -14,7 +14,7 @@
     "bcryptjs": "^2.4.3",
     "busboy": "^1.6.0",
     "cheerio": "^1.1.2",
-    "firebase": "^10.0.0",
+    "firebase": "^10.14.1",
     "firebase-admin": "^11.0.0",
     "googleapis": "^118.0.0",
     "mercadopago": "^2.1.12",
