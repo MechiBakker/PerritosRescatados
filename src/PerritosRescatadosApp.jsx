@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState, useContext, createContext 
 // import InstagramCarousel from "./InstagramCarousel"; // No usado, se mantiene por si acaso
 
 
-import AdminPanel from "../pages/admin";
+import AdminPanel from "./admin";
 
 
 /* ------------------ FIREBASE CLIENT (AUTH) INIT ------------------ */
