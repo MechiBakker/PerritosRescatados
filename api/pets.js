@@ -33,3 +33,10 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: e.message });
   }
 }
+
+console.log("ADMIN CHECK:", {
+  projectId: process.env.FIREBASE_PROJECT_ID,
+  clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+  privateKeyStartsWith: process.env.FIREBASE_PRIVATE_KEY?.slice(0, 20)
+});
+
