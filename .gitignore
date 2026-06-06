@@ -4,3 +4,4 @@
 # Archivos de entorno local
 .env.local
 .env*.local
+node_modules
