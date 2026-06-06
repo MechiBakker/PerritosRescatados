@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 // Asumo que tu componente principal se llama 'App' y está en './App.js'
-import App from './App'; 
+import App from './components/App'; 
 
 // Obtenemos el contenedor raíz del DOM
 const root = ReactDOM.createRoot(document.getElementById('root'));
