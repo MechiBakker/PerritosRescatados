@@ -1,6 +1,7 @@
 import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import PerritosRescatadosApp from "./components/PerritosRescatadosApp.jsx";
+import AdminPage from "./components/admin/AdminPage.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
 
 export default function App() {
