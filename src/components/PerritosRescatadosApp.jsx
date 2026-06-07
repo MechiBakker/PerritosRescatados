@@ -3,7 +3,6 @@ import { AdopcionesSupabase, TiendaSupabase } from "./SeccionesPublicas.jsx";
 import SeccionEstadisticas from "./SeccionEstadisticas.jsx";
 // Eliminamos la importación de InstagramCarousel.jsx
 import axios from 'axios'; // Necesario para las llamadas a la API
-import AdminLogin from "./AdminLogin.jsx";
 import { CMS_URL, API_URL } from "../config";
 
 // =================================================================
