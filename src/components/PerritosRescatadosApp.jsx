@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { AdopcionesSupabase, TiendaSupabase } from "./components/SeccionesPublicas.jsx";
-import SeccionEstadisticas from "./components/SeccionEstadisticas.jsx";
+import { AdopcionesSupabase, TiendaSupabase } from "./SeccionesPublicas.jsx";
+import SeccionEstadisticas from "./SeccionEstadisticas.jsx";
 // Eliminamos la importación de InstagramCarousel.jsx
 import axios from 'axios'; // Necesario para las llamadas a la API
 import AdminLogin from "./AdminLogin.jsx";
