@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 
 const NAV = [
-  { id: "mascotas", label: "🐾 Mascotas", icon: "🐾" },
-  { id: "tienda", label: "🛍️ Tienda", icon: "🛍️" },
-  { id: "estadisticas", label: "📊 Estadísticas", icon: "📊" },
+  { id: "mascotas", label: "Mascotas"},
+  { id: "tienda", label: "Tienda" },
+  { id: "estadisticas", label: "Estadísticas"},
 ];
 
 export default function AdminLayout({ children, activeTab, setActiveTab }) {
@@ -78,7 +78,7 @@ export default function AdminLayout({ children, activeTab, setActiveTab }) {
             rel="noopener noreferrer"
             className="mt-4 flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-slate-500 bg-white hover:bg-[#eff4fb] transition"
           >
-            🌐 Ver sitio web
+            Ver sitio web
           </a>
         </aside>
 
@@ -117,7 +117,7 @@ export default function AdminLayout({ children, activeTab, setActiveTab }) {
                 rel="noopener noreferrer"
                 className="mt-4 flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-slate-500 hover:bg-[#eff4fb]"
               >
-                🌐 Ver sitio web
+                Ver sitio web
               </a>
             </aside>
           </div>

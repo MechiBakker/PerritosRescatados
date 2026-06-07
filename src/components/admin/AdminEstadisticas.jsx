@@ -82,7 +82,7 @@ export default function AdminEstadisticas() {
       .upsert(payload, { onConflict: "mes,anio" });
 
     if (!error) {
-      showToast("✅ Estadísticas guardadas");
+      showToast("Estadísticas guardadas");
       fetchStats();
     }
     setSaving(false);
@@ -115,25 +115,21 @@ export default function AdminEstadisticas() {
       {/* Tarjetas de totales */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard
-          emoji="🐕"
           label="Rescates totales"
           value={totalRescates}
           color="border-[#38629F]"
         />
         <StatCard
-          emoji="🏡"
           label="Adopciones totales"
           value={totalAdopciones}
           color="border-[#F5793B]"
         />
         <StatCard
-          emoji="📅"
           label={`Rescates ${MESES[(Number(form.mes) || 1) - 1]}`}
           value={mesActual?.rescates ?? "—"}
           color="border-[#eff4fb]"
         />
         <StatCard
-          emoji="💕"
           label={`Adopciones ${MESES[(Number(form.mes) || 1) - 1]}`}
           value={mesActual?.adopciones ?? "—"}
           color="border-[#F7E9DC]"
