@@ -1,7 +1,11 @@
 import React, { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
+import AdminLayout from "./AdminLayout";
+import AdminMascotas from "./AdminMascotas";
+import AdminTienda from "./AdminTienda";
+import AdminEstadisticas from "./AdminEstadisticas";
 
-export default function Login() {
+function Login() {
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -20,7 +24,6 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-[#F7E9DC] flex items-center justify-center px-4">
       <div className="w-full max-w-sm bg-white rounded-2xl shadow-lg p-8">
-        {/* Logo */}
         <div className="flex flex-col items-center mb-8">
           <img
             src="/img/LogoTrans1.png"
@@ -28,8 +31,7 @@ export default function Login() {
             className="h-20 w-auto mb-3"
             onError={(e) => {
               e.target.onerror = null;
-              e.target.src =
-                "https://placehold.co/80x80/38629F/FFFFFF?text=PR";
+              e.target.src = "https://placehold.co/80x80/38629F/FFFFFF?text=PR";
             }}
           />
           <h1 className="text-xl font-semibold text-[#38629F]">Panel Admin</h1>
@@ -85,5 +87,32 @@ export default function Login() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function AdminPage() {
+  const { session } = useAuth();
+  const [activeTab, setActiveTab] = useState("mascotas");
+
+  if (session === undefined) {
+    return (
+      <div className="min-h-screen bg-[#F7E9DC] flex items-center justify-center">
+        <span className="text-[#38629F] text-sm animate-pulse">Cargando…</span>
+      </div>
+    );
+  }
+
+  if (!session) return <Login />;
+
+  const panels = {
+    mascotas: <AdminMascotas />,
+    tienda: <AdminTienda />,
+    estadisticas: <AdminEstadisticas />,
+  };
+
+  return (
+    <AdminLayout activeTab={activeTab} setActiveTab={setActiveTab}>
+      {panels[activeTab]}
+    </AdminLayout>
   );
 }
