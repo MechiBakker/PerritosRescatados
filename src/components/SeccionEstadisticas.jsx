@@ -28,7 +28,7 @@ export default function SeccionEstadisticas() {
     <section id="estadisticas" className="py-16 bg-[#eff4fb]">
       <div className="max-w-[1100px] mx-auto px-4 text-center">
         <h2 className="text-2xl md:text-3xl font-semibold text-[#38629F] mb-2">
-          Nuestro impacto 🐾
+          Nuestro impacto 
         </h2>
         <p className="text-slate-500 text-sm mb-10">
           Cada número es una historia real de amor y segunda oportunidad.
@@ -77,8 +77,8 @@ export default function SeccionEstadisticas() {
               <thead>
                 <tr className="bg-[#38629F] text-white">
                   <th className="py-3 px-4 text-left font-medium">Mes</th>
-                  <th className="py-3 px-4 text-center font-medium">🐕 Rescates</th>
-                  <th className="py-3 px-4 text-center font-medium">🏡 Adopciones</th>
+                  <th className="py-3 px-4 text-center font-medium"> Rescates</th>
+                  <th className="py-3 px-4 text-center font-medium"> Adopciones</th>
                 </tr>
               </thead>
               <tbody>
