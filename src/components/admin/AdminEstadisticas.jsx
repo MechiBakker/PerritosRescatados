@@ -90,7 +90,7 @@ export default function AdminEstadisticas() {
 
   const handleDelete = async (id) => {
     const { error } = await supabase.from("estadisticas").delete().eq("id", id);
-    if (!error) { showToast("🗑️ Registro eliminado"); fetchStats(); }
+    if (!error) { showToast("Registro eliminado"); fetchStats(); }
   };
 
   // Totales globales
@@ -106,7 +106,7 @@ export default function AdminEstadisticas() {
     <div className="flex flex-col gap-8">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-semibold text-[#38629F]">📊 Estadísticas</h1>
+        <h1 className="text-2xl font-semibold text-[#38629F]">Estadísticas</h1>
         <p className="text-slate-500 text-sm mt-1">
           Registrá rescates y adopciones por mes. Estos datos se muestran públicamente en el sitio.
         </p>
@@ -176,7 +176,7 @@ export default function AdminEstadisticas() {
 
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
-                🐕 Rescates del mes
+                Rescates del mes
               </label>
               <input
                 type="number"
@@ -191,7 +191,7 @@ export default function AdminEstadisticas() {
 
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
-                🏡 Adopciones del mes
+                Adopciones del mes
               </label>
               <input
                 type="number"
@@ -239,7 +239,7 @@ export default function AdminEstadisticas() {
                       {MESES[s.mes - 1]} {s.anio}
                     </span>
                     <span className="text-xs text-slate-500 ml-3">
-                      🐕 {s.rescates} rescates · 🏡 {s.adopciones} adopciones
+                      {s.rescates} rescates · 🏡 {s.adopciones} adopciones
                     </span>
                   </div>
                   <button

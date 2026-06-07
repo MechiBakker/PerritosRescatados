@@ -101,7 +101,7 @@ export default function AdminMascotas() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-[#38629F]">🐾 Mascotas</h1>
+          <h1 className="text-2xl font-semibold text-[#38629F]">Mascotas</h1>
           <p className="text-slate-500 text-sm mt-1">
             {mascotas.length} mascota{mascotas.length !== 1 ? "s" : ""} registrada{mascotas.length !== 1 ? "s" : ""}
           </p>
