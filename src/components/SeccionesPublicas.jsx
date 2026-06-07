@@ -1,26 +1,10 @@
-/**
- * REEMPLAZOS para PerritosRescatadosApp.jsx
- * ==========================================
- * Estos componentes reemplazan las secciones Adopciones y Tienda
- * para que lean dinámicamente desde Supabase en lugar de datos hardcodeados.
- *
- * INSTRUCCIONES:
- * 1. Agregar el import al inicio de PerritosRescatadosApp.jsx:
- *    import { useMascotas, useProductos } from "./lib/useSupabaseData";
- *
- * 2. Reemplazar la función Adopciones() existente por AdopcionesSupabase()
- * 3. Reemplazar la función Tienda() existente por TiendaSupabase()
- * 4. Agregar <SeccionEstadisticas /> en el <main> donde quieras mostrar las stats
- */
-
 import React, { useRef, useEffect } from "react";
-import { useMascotas, useProductos } from "./lib/useSupabaseData";
-import SeccionEstadisticas from "./SeccionEstadisticas";
+import { useMascotas, useProductos } from "../lib/useSupabaseData";
+import SeccionEstadisticas from "./SeccionEstadisticas.jsx";
+import InstagramCarousel from "./InstagramCarousel.jsx";
 
-
-/* ─── ADOPCIONES con Supabase ─────────────────────────────── */
 export function AdopcionesSupabase() {
-  const { mascotas, loading } = useMascotas(true); // solo disponibles
+  const { mascotas, loading } = useMascotas(true);
   const trackRef = useRef(null);
 
   const scrollByCard = (dir) => {
@@ -34,33 +18,26 @@ export function AdopcionesSupabase() {
   return (
     <section id="adopciones" className="py-16 bg-white">
       <div className="max-w-[1100px] mx-auto px-4">
-        <h2 className="text-2xl md:text-3xl font-semibold text-[#38629F]">
-          Adopciones
-        </h2>
+        <h2 className="text-2xl md:text-3xl font-semibold text-[#38629F]">Adopciones</h2>
         <br />
-
         <p className="text-slate-600 mt-2">
           Adoptar es un acto de amor. Antes de hacerlo, considerá factores como
           el espacio disponible en tu hogar, el tiempo para dedicarle, y el
           compromiso a largo plazo que implica tener un compañero peludo.
         </p>
-
         <ul className="list-disc pl-5 space-y-1 text-slate-700 mt-3">
           <li>Espacio suficiente en tu hogar para recibirlo cómodamente.</li>
           <li>Tiempo para paseos, higiene, juegos, mimos y acompañamiento diario.</li>
           <li>Costos de alimentación, atención veterinaria y otros cuidados.</li>
           <li>Convivencia con el resto de la familia: niños, adultos mayores o mascotas.</li>
         </ul>
-
         <p className="text-slate-600 mt-3">
           Cada rescatado viene de una historia distinta. Es fundamental brindar
           paciencia, seguridad y cariño durante su adaptación. 🐾
         </p>
-
         <br />
-
         <div className="mt-6 flex flex-wrap gap-3 justify-center">
-          <a
+          
             href="https://docs.google.com/forms/d/e/1FAIpQLSf-7KHtM4XVTRmee_uYTcW3GlZPY6XmX1rlYN5Q6QrGmFh8-w/viewform"
             target="_blank"
             rel="noopener noreferrer"
@@ -70,7 +47,6 @@ export function AdopcionesSupabase() {
           </a>
         </div>
 
-        {/* Carrusel de mascotas desde Supabase */}
         {!loading && mascotas.length > 0 && (
           <>
             <h3 className="text-[#38629F] text-xl font-semibold mt-10 mb-3">
@@ -82,13 +58,10 @@ export function AdopcionesSupabase() {
                 className="absolute left-1 top-1/2 -translate-y-1/2 grid place-items-center w-9 h-9 rounded-full bg-white shadow hover:shadow-md border text-[#38629F] z-10"
                 aria-label="Anterior"
                 onClick={() => scrollByCard(-1)}
-              >
-                «
-              </button>
+              >«</button>
               <div
                 ref={trackRef}
                 className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory px-1 scrollbar-hide relative"
-                role="region"
               >
                 {mascotas.map((m) => (
                   <article
@@ -100,10 +73,7 @@ export function AdopcionesSupabase() {
                       src={m.imagen_url || `https://placehold.co/280x192/eff4fb/38629F?text=${m.nombre}`}
                       alt={m.nombre}
                       className="w-full h-48 object-cover rounded-t-2xl"
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = `https://placehold.co/280x192/eff4fb/38629F?text=${m.nombre}`;
-                      }}
+                      onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/280x192/eff4fb/38629F?text=${m.nombre}`; }}
                     />
                     <div className="p-4">
                       <h3 className="text-[#38629F] font-semibold text-lg">{m.nombre}</h3>
@@ -118,28 +88,23 @@ export function AdopcionesSupabase() {
                 className="absolute right-1 top-1/2 -translate-y-1/2 grid place-items-center w-9 h-9 rounded-full bg-white shadow hover:shadow-md border text-[#38629F] z-10"
                 aria-label="Siguiente"
                 onClick={() => scrollByCard(1)}
-              >
-                »
-              </button>
+              >»</button>
             </div>
           </>
         )}
 
-        {/* Instagram carousel original se mantiene */}
         <div className="mt-10">
           <h3 className="text-[#38629F] text-xl font-semibold text-center mb-3">
             🐾 Últimos posteos en Instagram
           </h3>
           <InstagramCarousel />
         </div>
-
         <br />
       </div>
     </section>
   );
 }
 
-/* ─── TIENDA con Supabase ─────────────────────────────────── */
 export function TiendaSupabase() {
   const { productos, loading } = useProductos(true);
   const trackRef = useRef(null);
@@ -156,10 +121,7 @@ export function TiendaSupabase() {
   useEffect(() => {
     const el = trackRef.current;
     if (!el) return;
-    const stop = () => {
-      clearInterval(autoScrollRef.current);
-      autoScrollRef.current = null;
-    };
+    const stop = () => { clearInterval(autoScrollRef.current); autoScrollRef.current = null; };
     el.addEventListener("touchstart", stop);
     el.addEventListener("mousedown", stop);
     if (window.innerWidth < 768) {
@@ -191,82 +153,46 @@ export function TiendaSupabase() {
         {loading ? (
           <p className="text-center text-slate-400">Cargando productos…</p>
         ) : productos.length === 0 ? (
-          <p className="text-center text-slate-500">
-            Próximamente nuevos productos. ¡Seguinos para enterarte!
-          </p>
+          <p className="text-center text-slate-500">Próximamente nuevos productos. ¡Seguinos para enterarte!</p>
         ) : (
           <>
-            {/* Carrusel mobile */}
             <div className="relative md:hidden">
-              <button
-                type="button"
-                onClick={() => scrollByCard(-1)}
-                className="absolute left-1 top-1/2 -translate-y-1/2 bg-white text-[#38629F] w-8 h-8 rounded-full shadow hover:shadow-md z-10"
-              >«</button>
-              <div
-                ref={trackRef}
-                className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory scrollbar-hide px-1"
-              >
+              <button type="button" onClick={() => scrollByCard(-1)}
+                className="absolute left-1 top-1/2 -translate-y-1/2 bg-white text-[#38629F] w-8 h-8 rounded-full shadow hover:shadow-md z-10">«</button>
+              <div ref={trackRef} className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory scrollbar-hide px-1">
                 {productos.map((item) => (
-                  <article
-                    key={item.id}
-                    data-card
-                    className="min-w-[240px] max-w-[260px] snap-start bg-white rounded-2xl shadow hover:shadow-lg transition-shadow overflow-hidden flex flex-col"
-                  >
-                    <img
-                      src={item.imagen_url || `https://placehold.co/300x300/eff4fb/38629F?text=${item.nombre}`}
-                      alt={item.nombre}
-                      className="w-full h-64 object-cover"
-                      onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/300x300/eff4fb/38629F?text=${item.nombre}`; }}
-                    />
+                  <article key={item.id} data-card
+                    className="min-w-[240px] max-w-[260px] snap-start bg-white rounded-2xl shadow hover:shadow-lg transition-shadow overflow-hidden flex flex-col">
+                    <img src={item.imagen_url || `https://placehold.co/300x300/eff4fb/38629F?text=${item.nombre}`}
+                      alt={item.nombre} className="w-full h-64 object-cover"
+                      onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/300x300/eff4fb/38629F?text=${item.nombre}`; }} />
                     <div className="p-4 text-center">
                       <h3 className="text-[#38629F] font-semibold text-lg">{item.nombre}</h3>
                       {item.descripcion && <p className="text-slate-500 text-xs mt-1">{item.descripcion}</p>}
                       <p className="text-slate-600 font-medium mt-1">{formatPrecio(item.precio)}</p>
-                      <a
-                        href="https://wa.me/5492216155465"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-3 inline-block px-4 py-2 rounded-full text-white bg-[#38629F] hover:brightness-95 text-sm font-semibold"
-                      >
-                        Comprar
-                      </a>
+                      <a href="https://wa.me/5492216155465" target="_blank" rel="noopener noreferrer"
+                        className="mt-3 inline-block px-4 py-2 rounded-full text-white bg-[#38629F] hover:brightness-95 text-sm font-semibold">Comprar</a>
                     </div>
                   </article>
                 ))}
               </div>
-              <button
-                type="button"
-                onClick={() => scrollByCard(1)}
-                className="absolute right-1 top-1/2 -translate-y-1/2 bg-white text-[#38629F] w-8 h-8 rounded-full shadow hover:shadow-md z-10"
-              >»</button>
+              <button type="button" onClick={() => scrollByCard(1)}
+                className="absolute right-1 top-1/2 -translate-y-1/2 bg-white text-[#38629F] w-8 h-8 rounded-full shadow hover:shadow-md z-10">»</button>
             </div>
 
-            {/* Grid desktop */}
             <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {productos.map((item) => (
-                <article
-                  key={item.id}
-                  className="bg-white rounded-2xl shadow hover:shadow-lg transition-shadow overflow-hidden flex flex-col"
-                >
-                  <img
-                    src={item.imagen_url || `https://placehold.co/300x300/eff4fb/38629F?text=${item.nombre}`}
-                    alt={item.nombre}
-                    className="w-full h-80 object-cover"
-                    onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/300x300/eff4fb/38629F?text=${item.nombre}`; }}
-                  />
+                <article key={item.id}
+                  className="bg-white rounded-2xl shadow hover:shadow-lg transition-shadow overflow-hidden flex flex-col">
+                  <img src={item.imagen_url || `https://placehold.co/300x300/eff4fb/38629F?text=${item.nombre}`}
+                    alt={item.nombre} className="w-full h-80 object-cover"
+                    onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/300x300/eff4fb/38629F?text=${item.nombre}`; }} />
                   <div className="p-4 text-center">
                     <h3 className="text-[#38629F] font-semibold text-lg">{item.nombre}</h3>
                     {item.descripcion && <p className="text-slate-500 text-xs mt-1">{item.descripcion}</p>}
                     <p className="text-slate-600 font-medium mt-1">{formatPrecio(item.precio)}</p>
-                    <a
-                      href="https://wa.me/5492216155465"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-3 inline-block px-4 py-2 rounded-full text-white bg-[#38629F] hover:brightness-95 text-sm font-semibold"
-                    >
-                      Comprar
-                    </a>
+                    <a href="https://wa.me/5492216155465" target="_blank" rel="noopener noreferrer"
+                      className="mt-3 inline-block px-4 py-2 rounded-full text-white bg-[#38629F] hover:brightness-95 text-sm font-semibold">Comprar</a>
                   </div>
                 </article>
               ))}
