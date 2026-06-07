@@ -10,6 +10,7 @@
     "deploy": "vercel --prod"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.107.0",
     "axios": "^1.12.2",
     "bcryptjs": "^2.4.3",
     "busboy": "^1.6.0",
