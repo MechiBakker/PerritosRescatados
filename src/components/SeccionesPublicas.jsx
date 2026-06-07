@@ -1,6 +1,5 @@
 import React, { useRef, useEffect } from "react";
 import { useMascotas, useProductos } from "../lib/useSupabaseData";
-import InstagramCarousel from "./InstagramCarousel.jsx";
 
 export function AdopcionesSupabase() {
   const { mascotas, loading } = useMascotas(true);
@@ -45,6 +44,10 @@ export function AdopcionesSupabase() {
             Quiero adoptar
           </a>
         </div>
+
+        {loading && (
+          <p className="text-center text-slate-400 mt-10">Cargando mascotas…</p>
+        )}
 
         {!loading && mascotas.length > 0 && (
           <>
@@ -94,13 +97,6 @@ export function AdopcionesSupabase() {
             </div>
           </>
         )}
-
-        <div className="mt-10">
-          <h3 className="text-[#38629F] text-xl font-semibold text-center mb-3">
-            🐾 Últimos posteos en Instagram
-          </h3>
-          <InstagramCarousel />
-        </div>
         <br />
       </div>
     </section>
