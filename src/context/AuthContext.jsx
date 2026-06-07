@@ -7,12 +7,15 @@ export function AuthProvider({ children }) {
   const [session, setSession] = useState(undefined); // undefined = loading
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSession(data.session));
-    const { data: listener } = supabase.auth.onAuthStateChange((_e, s) =>
-      setSession(s)
-    );
-    return () => listener.subscription.unsubscribe();
-  }, []);
+  supabase.auth.getSession().then(({ data, error }) => {
+    console.log("SESSION:", data, "ERROR:", error);
+    setSession(data.session);
+  });
+  const { data: listener } = supabase.auth.onAuthStateChange((_e, s) =>
+    setSession(s)
+  );
+  return () => listener.subscription.unsubscribe();
+}, []);
 
   const login = (email, password) =>
     supabase.auth.signInWithPassword({ email, password });
