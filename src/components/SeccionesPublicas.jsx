@@ -15,7 +15,7 @@
 
 import React, { useRef, useEffect } from "react";
 import { useMascotas, useProductos } from "./lib/useSupabaseData";
-import SeccionEstadisticas from "./components/SeccionEstadisticas";
+import SeccionEstadisticas from "./SeccionEstadisticas";
 import InstagramCarousel from "./InstagramCarousel";
 
 /* ─── ADOPCIONES con Supabase ─────────────────────────────── */
