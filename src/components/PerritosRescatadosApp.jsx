@@ -191,12 +191,44 @@ function Colabora() {
             Donar ahora
           </a>
           <a
+            href="https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=f136b0af870d467bba525aed525f74f6"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex px-5 py-3 rounded-full font-semibold text-white bg-[#38629F] hover:brightness-95"
+          >
+            Suscribirme $3.000
+          </a>
+          <a
+            href="https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=feb774cfde544ddd939bd2893b2137d5"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex px-5 py-3 rounded-full font-semibold text-white bg-[#38629F] hover:brightness-95"
+          >
+            Suscribirme $5.000
+          </a>
+          <a
             href="https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=1dae99c69f3c49d485dd2540c3a5b89e"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex px-5 py-3 rounded-full font-semibold text-white bg-[#38629F] hover:brightness-95"
           >
-            Suscribirme
+            Suscribirme $10.000
+          </a>
+          <a
+            href="https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=39ad68c7b6b04721a48997c1ff2037f1"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex px-5 py-3 rounded-full font-semibold text-white bg-[#38629F] hover:brightness-95"
+          >
+            Suscribirme $15.000
+          </a>
+          <a
+            href="https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=1d46bf3a71f54c2ca0a5e8fcaa8d0ec7"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex px-5 py-3 rounded-full font-semibold text-white bg-[#38629F] hover:brightness-95"
+          >
+            Suscribirme $20.000
           </a>
         </div>
       </div>
