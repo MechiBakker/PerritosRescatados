@@ -238,7 +238,7 @@ function Footer() {
         </div>
       </div>
       <div className="border-t border-white/30 mt-6">
-        <p className="text-center text-sm opacity-80 py-4">© {year} Perritos Rescatados</p>
+        <p className="text-center text-sm opacity-80 py-4">© {year} Perritos Rescatados - Desarrollo: Mechi Bakker</p>
       </div>
     </footer>
   );
