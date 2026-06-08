@@ -314,8 +314,8 @@ export function TiendaSupabase() {
                 className="shrink-0 bg-white text-[#38629F] w-8 h-8 rounded-full shadow hover:shadow-md border border-slate-200 grid place-items-center">»</button>
             </div>
 
-           {/* Carrusel desktop */}
-           <div className="md:hidden flex items-center gap-2">
+            {/* Carrusel desktop */}
+            <div className="hidden md:flex items-center gap-2">
               <button type="button" onClick={() => scrollByCard(-1)}
                 className="shrink-0 grid place-items-center w-9 h-9 rounded-full bg-white shadow hover:shadow-md border border-slate-200 text-[#38629F]">«</button>
               <div className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory scrollbar-hide flex-1">
@@ -336,7 +336,7 @@ export function TiendaSupabase() {
               <button type="button" onClick={() => scrollByCard(1)}
                 className="shrink-0 grid place-items-center w-9 h-9 rounded-full bg-white shadow hover:shadow-md border border-slate-200 text-[#38629F]">»</button>
             </div>
-        </>
+          </>
         )}
       </div>
     </section>
