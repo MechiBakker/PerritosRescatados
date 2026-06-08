@@ -41,6 +41,7 @@ function Header() {
           <a className="hover:text-[#F7E9DC] transition-colors" href="#adopciones">Adopciones</a>
           <a className="hover:text-[#F7E9DC] transition-colors" href="#transitos">Tránsitos</a>
           <a className="hover:text-[#F7E9DC] transition-colors" href="#tienda">Tienda</a>
+          <a className="hover:text-[#F7E9DC] transition-colors" href="#tienda">Nuestro impacto</a>
           <a className="hover:text-[#F7E9DC] transition-colors" href="#colabora">Colaborá</a>
           <a
             href="/admin"
@@ -61,6 +62,7 @@ function Header() {
         <a href="#transitos" className="hover:text-[#F7E9DC]" onClick={() => setOpen(false)}>Tránsitos</a>
         <a href="#tienda" className="hover:text-[#F7E9DC]" onClick={() => setOpen(false)}>Tienda</a>
         <a href="#colabora" className="hover:text-[#F7E9DC]" onClick={() => setOpen(false)}>Colaborá</a>
+        <a href="#colabora" className="hover:text-[#F7E9DC]" onClick={() => setOpen(false)}>Nuestro impacto</a>
         <a href="/admin" className="hover:text-[#F7E9DC]" onClick={() => setOpen(false)}>Admin</a>
       </nav>
     </header>
