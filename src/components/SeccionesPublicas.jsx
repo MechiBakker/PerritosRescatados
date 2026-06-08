@@ -4,48 +4,162 @@ import { useMascotas, useProductos } from "../lib/useSupabaseData";
 const urlsToArray = (item) =>
   [item.imagen_url, item.imagen_url_2, item.imagen_url_3, item.imagen_url_4, item.imagen_url_5].filter(Boolean);
 
-function PhotoCarousel({ fotos, alt, height = "h-48" }) {
-  const [current, setCurrent] = useState(0);
-  const src = fotos.length ? fotos[current] : "https://placehold.co/280x192/eff4fb/38629F?text=Sin+foto";
+/* ── Lightbox ─────────────────────────────────────────────── */
+function Lightbox({ fotos, startIndex, onClose }) {
+  const [current, setCurrent] = useState(startIndex);
+
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === "Escape") onClose();
+      if (e.key === "ArrowRight") setCurrent((c) => (c + 1) % fotos.length);
+      if (e.key === "ArrowLeft") setCurrent((c) => (c - 1 + fotos.length) % fotos.length);
+    };
+    window.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [fotos.length, onClose]);
+
   return (
-    <div className={"relative overflow-hidden rounded-t-2xl " + height}>
-      <img src={src} alt={alt + " foto " + (current + 1)} className="w-full h-full object-cover" />
-      {fotos.length > 1 && (
-        <>
-          <button
-            onClick={(e) => { e.stopPropagation(); setCurrent((c) => (c - 1 + fotos.length) % fotos.length); }}
-            className="absolute left-1 top-1/2 -translate-y-1/2 bg-white/80 text-[#38629F] w-7 h-7 rounded-full shadow text-sm flex items-center justify-center hover:bg-white z-10"
-          >‹</button>
-          <button
-            onClick={(e) => { e.stopPropagation(); setCurrent((c) => (c + 1) % fotos.length); }}
-            className="absolute right-1 top-1/2 -translate-y-1/2 bg-white/80 text-[#38629F] w-7 h-7 rounded-full shadow text-sm flex items-center justify-center hover:bg-white z-10"
-          >›</button>
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-10">
+    <div
+      className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center"
+      onClick={onClose}
+    >
+      {/* Imagen */}
+      <div className="relative max-w-4xl max-h-[90vh] w-full mx-4" onClick={(e) => e.stopPropagation()}>
+        <img
+          src={fotos[current]}
+          alt={"Foto " + (current + 1)}
+          className="w-full max-h-[80vh] object-contain rounded-xl"
+        />
+
+        {/* Cerrar */}
+        <button
+          onClick={onClose}
+          className="absolute -top-10 right-0 text-white text-3xl hover:text-slate-300"
+        >✕</button>
+
+        {/* Flechas */}
+        {fotos.length > 1 && (
+          <>
+            <button
+              onClick={() => setCurrent((c) => (c - 1 + fotos.length) % fotos.length)}
+              className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white w-10 h-10 rounded-full text-xl flex items-center justify-center transition"
+            >‹</button>
+            <button
+              onClick={() => setCurrent((c) => (c + 1) % fotos.length)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white w-10 h-10 rounded-full text-xl flex items-center justify-center transition"
+            >›</button>
+          </>
+        )}
+
+        {/* Puntitos */}
+        {fotos.length > 1 && (
+          <div className="flex gap-2 justify-center mt-3">
             {fotos.map((_, i) => (
-              <button key={i} onClick={(e) => { e.stopPropagation(); setCurrent(i); }}
-                className={"w-1.5 h-1.5 rounded-full transition " + (i === current ? "bg-white" : "bg-white/50")} />
+              <button
+                key={i}
+                onClick={() => setCurrent(i)}
+                className={"w-2 h-2 rounded-full transition " + (i === current ? "bg-white" : "bg-white/40")}
+              />
             ))}
           </div>
-        </>
-      )}
+        )}
+
+        {/* Miniaturas */}
+        {fotos.length > 1 && (
+          <div className="flex gap-2 justify-center mt-3 flex-wrap">
+            {fotos.map((url, i) => (
+              <img
+                key={i}
+                src={url}
+                alt={"Miniatura " + (i + 1)}
+                onClick={() => setCurrent(i)}
+                className={"w-14 h-14 object-cover rounded-lg cursor-pointer border-2 transition " + (i === current ? "border-white" : "border-transparent opacity-60 hover:opacity-100")}
+              />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
+/* ── Carrusel de fotos por tarjeta ────────────────────────── */
+function PhotoCarousel({ fotos, alt, height = "h-48" }) {
+  const [current, setCurrent] = useState(0);
+  const [lightbox, setLightbox] = useState(false);
+
+  const src = fotos.length
+    ? fotos[current]
+    : "https://placehold.co/280x192/eff4fb/38629F?text=Sin+foto";
+
+  return (
+    <>
+      <div className={"relative overflow-hidden rounded-t-2xl cursor-zoom-in " + height}>
+        <img
+          src={src}
+          alt={alt + " foto " + (current + 1)}
+          className="w-full h-full object-cover"
+          onClick={() => fotos.length && setLightbox(true)}
+          title="Clic para ampliar"
+        />
+
+        {fotos.length > 1 && (
+          <>
+            <button
+              onClick={(e) => { e.stopPropagation(); setCurrent((c) => (c - 1 + fotos.length) % fotos.length); }}
+              className="absolute left-1 top-1/2 -translate-y-1/2 bg-white/80 text-[#38629F] w-7 h-7 rounded-full shadow text-sm flex items-center justify-center hover:bg-white z-10"
+            >‹</button>
+            <button
+              onClick={(e) => { e.stopPropagation(); setCurrent((c) => (c + 1) % fotos.length); }}
+              className="absolute right-1 top-1/2 -translate-y-1/2 bg-white/80 text-[#38629F] w-7 h-7 rounded-full shadow text-sm flex items-center justify-center hover:bg-white z-10"
+            >›</button>
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-10">
+              {fotos.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={(e) => { e.stopPropagation(); setCurrent(i); }}
+                  className={"w-1.5 h-1.5 rounded-full transition " + (i === current ? "bg-white" : "bg-white/50")}
+                />
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* Ícono lupa */}
+        {fotos.length > 0 && (
+          <div className="absolute top-2 right-2 bg-black/40 text-white text-xs px-1.5 py-1 rounded-full pointer-events-none">
+            🔍
+          </div>
+        )}
+      </div>
+
+      {lightbox && (
+        <Lightbox fotos={fotos} startIndex={current} onClose={() => setLightbox(false)} />
+      )}
+    </>
+  );
+}
+
+/* ── Descripción con saltos de línea ─────────────────────── */
 function Descripcion({ texto }) {
   if (!texto) return null;
   return (
     <p className="text-slate-600 text-sm mt-1">
-      {texto.split("\n").map((linea, i) => (
+      {texto.split("\n").map((linea, i, arr) => (
         <React.Fragment key={i}>
           {linea}
-          {i < texto.split("\n").length - 1 && <br />}
+          {i < arr.length - 1 && <br />}
         </React.Fragment>
       ))}
     </p>
   );
 }
 
+/* ── Sección Adopciones ───────────────────────────────────── */
 export function AdopcionesSupabase() {
   const { mascotas, loading } = useMascotas(true);
   const trackRef = useRef(null);
@@ -95,8 +209,6 @@ export function AdopcionesSupabase() {
         {!loading && mascotas.length > 0 && (
           <>
             <h3 className="text-[#38629F] text-xl font-semibold mt-10 mb-4">Mascotas en adopción</h3>
-
-            {/* Carrusel con botones externos */}
             <div className="flex items-center gap-2">
               <button
                 type="button"
@@ -105,10 +217,7 @@ export function AdopcionesSupabase() {
                 onClick={() => scrollByCard(-1)}
               >«</button>
 
-              <div
-                ref={trackRef}
-                className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory scrollbar-hide flex-1"
-              >
+              <div ref={trackRef} className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory scrollbar-hide flex-1">
                 {mascotas.map((m) => (
                   <article
                     key={m.id}
@@ -139,6 +248,7 @@ export function AdopcionesSupabase() {
   );
 }
 
+/* ── Sección Tienda ───────────────────────────────────────── */
 export function TiendaSupabase() {
   const { productos, loading } = useProductos(true);
   const trackRef = useRef(null);
@@ -176,9 +286,9 @@ export function TiendaSupabase() {
   return (
     <section id="tienda" className="py-16 bg-[#F7E9DC]">
       <div className="max-w-[1100px] mx-auto px-4">
-        <h2 className="text-2xl md:text-3xl font-semibold text-[#38629F] mb-6 text-center">Tienda solidaria</h2>
+        <h2 className="text-2xl md:text-3xl font-semibold text-[#38629F] mb-6 text-center">🛍️ Tienda solidaria</h2>
         <p className="text-slate-600 text-center mb-10">
-          Todo lo recaudado se destina a la atención veterinaria, alimento y cuidados de nuestros rescatados. 
+          Todo lo recaudado se destina a la atención veterinaria, alimento y cuidados de nuestros rescatados.
         </p>
 
         {loading ? (
@@ -190,7 +300,7 @@ export function TiendaSupabase() {
             {/* Carrusel mobile */}
             <div className="md:hidden flex items-center gap-2">
               <button type="button" onClick={() => scrollByCard(-1)}
-                className="shrink-0 bg-white text-[#38629F] w-8 h-8 rounded-full shadow hover:shadow-md border border-slate-200">«</button>
+                className="shrink-0 bg-white text-[#38629F] w-8 h-8 rounded-full shadow hover:shadow-md border border-slate-200 grid place-items-center">«</button>
               <div ref={trackRef} className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory scrollbar-hide flex-1">
                 {productos.map((item) => (
                   <article key={item.id} data-card
@@ -207,7 +317,7 @@ export function TiendaSupabase() {
                 ))}
               </div>
               <button type="button" onClick={() => scrollByCard(1)}
-                className="shrink-0 bg-white text-[#38629F] w-8 h-8 rounded-full shadow hover:shadow-md border border-slate-200">»</button>
+                className="shrink-0 bg-white text-[#38629F] w-8 h-8 rounded-full shadow hover:shadow-md border border-slate-200 grid place-items-center">»</button>
             </div>
 
             {/* Grid desktop */}
