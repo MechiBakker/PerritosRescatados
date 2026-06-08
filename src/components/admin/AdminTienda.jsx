@@ -95,7 +95,7 @@ export default function AdminTienda() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-[#38629F]">🛍️ Tienda solidaria</h1>
+          <h1 className="text-2xl font-semibold text-[#38629F]">Tienda solidaria</h1>
           <p className="text-slate-500 text-sm mt-1">{productos.length} producto{productos.length !== 1 ? "s" : ""}</p>
         </div>
         <button onClick={openNew} className="px-4 py-2.5 rounded-full bg-[#F5793B] text-white text-sm font-semibold hover:brightness-95 transition">

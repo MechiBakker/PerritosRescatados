@@ -64,7 +64,7 @@ export function AdopcionesSupabase() {
         </ul>
         <p className="text-slate-600 mt-3">
           Cada rescatado viene de una historia distinta. Es fundamental brindar
-          paciencia, seguridad y cariño durante su adaptación. 🐾
+          paciencia, seguridad y cariño durante su adaptación.
         </p>
         <br />
         <div className="mt-6 flex flex-wrap gap-3 justify-center">
@@ -82,7 +82,7 @@ export function AdopcionesSupabase() {
 
         {!loading && mascotas.length > 0 && (
           <>
-            <h3 className="text-[#38629F] text-xl font-semibold mt-10 mb-3">🐾 Mascotas en adopción</h3>
+            <h3 className="text-[#38629F] text-xl font-semibold mt-10 mb-3">Mascotas en adopción</h3>
             <div className="relative mt-2">
               <button type="button"
                 className="absolute left-1 top-1/2 -translate-y-1/2 grid place-items-center w-9 h-9 rounded-full bg-white shadow hover:shadow-md border text-[#38629F] z-10"
@@ -151,7 +151,7 @@ export function TiendaSupabase() {
       <div className="max-w-[1100px] mx-auto px-4">
         <h2 className="text-2xl md:text-3xl font-semibold text-[#38629F] mb-6 text-center">🛍️ Tienda solidaria</h2>
         <p className="text-slate-600 text-center mb-10">
-          Todo lo recaudado se destina a la atención veterinaria, alimento y cuidados de nuestros rescatados. 💕
+          Todo lo recaudado se destina a la atención veterinaria, alimento y cuidados de nuestros rescatados.
         </p>
 
         {loading ? (

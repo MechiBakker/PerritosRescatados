@@ -80,7 +80,7 @@ export default function AdminMascotas() {
 
   const handleDelete = async () => {
     const { error } = await supabase.from("mascotas").delete().eq("id", deleteId);
-    if (!error) { showToast("🗑️ Mascota eliminada"); fetchMascotas(); }
+    if (!error) { showToast("Mascota eliminada"); fetchMascotas(); }
     setDeleteId(null);
   };
 
@@ -88,7 +88,7 @@ export default function AdminMascotas() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-[#38629F]">🐾 Mascotas</h1>
+          <h1 className="text-2xl font-semibold text-[#38629F]">Mascotas</h1>
           <p className="text-slate-500 text-sm mt-1">{mascotas.length} mascota{mascotas.length !== 1 ? "s" : ""} registrada{mascotas.length !== 1 ? "s" : ""}</p>
         </div>
         <button onClick={openNew} className="px-4 py-2.5 rounded-full bg-[#38629F] text-white text-sm font-semibold hover:brightness-95 transition">
