@@ -314,22 +314,29 @@ export function TiendaSupabase() {
                 className="shrink-0 bg-white text-[#38629F] w-8 h-8 rounded-full shadow hover:shadow-md border border-slate-200 grid place-items-center">»</button>
             </div>
 
-            {/* Grid desktop */}
-            <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {productos.map((item) => (
-                <article key={item.id} className="bg-white rounded-2xl shadow hover:shadow-lg transition-shadow overflow-hidden flex flex-col">
-                  <PhotoCarousel fotos={urlsToArray(item)} alt={item.nombre} height="h-80" />
-                  <div className="p-4 text-center">
-                    <h3 className="text-[#38629F] font-semibold text-lg">{item.nombre}</h3>
-                    {item.descripcion && <p className="text-slate-500 text-xs mt-1">{item.descripcion}</p>}
-                    <p className="text-slate-600 font-medium mt-1">{formatPrecio(item.precio)}</p>
-                    <a href="https://wa.me/5492216155465" target="_blank" rel="noopener noreferrer"
-                      className="mt-3 inline-block px-4 py-2 rounded-full text-white bg-[#38629F] hover:brightness-95 text-sm font-semibold">Comprar</a>
-                  </div>
-                </article>
-              ))}
+           {/* Carrusel desktop */}
+           <div className="md:hidden flex items-center gap-2">
+              <button type="button" onClick={() => scrollByCard(-1)}
+                className="shrink-0 grid place-items-center w-9 h-9 rounded-full bg-white shadow hover:shadow-md border border-slate-200 text-[#38629F]">«</button>
+              <div className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory scrollbar-hide flex-1">
+                {productos.map((item) => (
+                  <article key={item.id} data-card
+                    className="shrink-0 w-[300px] snap-start bg-white rounded-2xl shadow hover:shadow-lg transition-shadow overflow-hidden flex flex-col">
+                    <PhotoCarousel fotos={urlsToArray(item)} alt={item.nombre} height="h-72" />
+                    <div className="p-4 text-center">
+                      <h3 className="text-[#38629F] font-semibold text-lg">{item.nombre}</h3>
+                      {item.descripcion && <p className="text-slate-500 text-xs mt-1">{item.descripcion}</p>}
+                      <p className="text-slate-600 font-medium mt-1">{formatPrecio(item.precio)}</p>
+                      <a href="https://wa.me/5492216155465" target="_blank" rel="noopener noreferrer"
+                        className="mt-3 inline-block px-4 py-2 rounded-full text-white bg-[#38629F] hover:brightness-95 text-sm font-semibold">Comprar</a>
+                    </div>
+                  </article>
+                ))}
+              </div>
+              <button type="button" onClick={() => scrollByCard(1)}
+                className="shrink-0 grid place-items-center w-9 h-9 rounded-full bg-white shadow hover:shadow-md border border-slate-200 text-[#38629F]">»</button>
             </div>
-          </>
+        </>
         )}
       </div>
     </section>
