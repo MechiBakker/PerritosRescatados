@@ -191,7 +191,7 @@ function Colabora() {
             Donar ahora
           </a>
           <a
-            href="https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=0335e4d01d024164a176c82074e2b61b"
+            href="https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=1dae99c69f3c49d485dd2540c3a5b89e"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex px-5 py-3 rounded-full font-semibold text-white bg-[#38629F] hover:brightness-95"
