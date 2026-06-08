@@ -239,7 +239,7 @@ export default function AdminEstadisticas() {
                       {MESES[s.mes - 1]} {s.anio}
                     </span>
                     <span className="text-xs text-slate-500 ml-3">
-                      {s.rescates} rescates · 🏡 {s.adopciones} adopciones
+                      {s.rescates} rescates · {s.adopciones} adopciones
                     </span>
                   </div>
                   <button
