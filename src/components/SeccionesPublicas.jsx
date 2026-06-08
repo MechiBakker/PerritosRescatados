@@ -129,12 +129,6 @@ function PhotoCarousel({ fotos, alt, height = "h-48" }) {
           </>
         )}
 
-        {/* Ícono lupa */}
-        {fotos.length > 0 && (
-          <div className="absolute top-2 right-2 bg-black/40 text-white text-xs px-1.5 py-1 rounded-full pointer-events-none">
-            🔍
-          </div>
-        )}
       </div>
 
       {lightbox && (
@@ -286,7 +280,7 @@ export function TiendaSupabase() {
   return (
     <section id="tienda" className="py-16 bg-[#F7E9DC]">
       <div className="max-w-[1100px] mx-auto px-4">
-        <h2 className="text-2xl md:text-3xl font-semibold text-[#38629F] mb-6 text-center">🛍️ Tienda solidaria</h2>
+        <h2 className="text-2xl md:text-3xl font-semibold text-[#38629F] mb-6 text-center">Tienda solidaria</h2>
         <p className="text-slate-600 text-center mb-10">
           Todo lo recaudado se destina a la atención veterinaria, alimento y cuidados de nuestros rescatados.
         </p>
