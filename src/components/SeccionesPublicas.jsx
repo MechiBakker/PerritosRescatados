@@ -6,31 +6,43 @@ const urlsToArray = (item) =>
 
 function PhotoCarousel({ fotos, alt, height = "h-48" }) {
   const [current, setCurrent] = useState(0);
-  if (!fotos.length) return (
-    <img src="https://placehold.co/280x192/eff4fb/38629F?text=Sin+foto" alt={alt} className={"w-full object-cover rounded-t-2xl " + height} />
-  );
+  const src = fotos.length ? fotos[current] : "https://placehold.co/280x192/eff4fb/38629F?text=Sin+foto";
   return (
-    <div className="relative overflow-hidden rounded-t-2xl">
-      <img src={fotos[current]} alt={alt + " foto " + (current + 1)} className={"w-full object-cover " + height} />
+    <div className={"relative overflow-hidden rounded-t-2xl " + height}>
+      <img src={src} alt={alt + " foto " + (current + 1)} className="w-full h-full object-cover" />
       {fotos.length > 1 && (
         <>
           <button
-            onClick={() => setCurrent((c) => (c - 1 + fotos.length) % fotos.length)}
-            className="absolute left-1 top-1/2 -translate-y-1/2 bg-white/80 text-[#38629F] w-7 h-7 rounded-full shadow text-sm flex items-center justify-center hover:bg-white"
+            onClick={(e) => { e.stopPropagation(); setCurrent((c) => (c - 1 + fotos.length) % fotos.length); }}
+            className="absolute left-1 top-1/2 -translate-y-1/2 bg-white/80 text-[#38629F] w-7 h-7 rounded-full shadow text-sm flex items-center justify-center hover:bg-white z-10"
           >‹</button>
           <button
-            onClick={() => setCurrent((c) => (c + 1) % fotos.length)}
-            className="absolute right-1 top-1/2 -translate-y-1/2 bg-white/80 text-[#38629F] w-7 h-7 rounded-full shadow text-sm flex items-center justify-center hover:bg-white"
+            onClick={(e) => { e.stopPropagation(); setCurrent((c) => (c + 1) % fotos.length); }}
+            className="absolute right-1 top-1/2 -translate-y-1/2 bg-white/80 text-[#38629F] w-7 h-7 rounded-full shadow text-sm flex items-center justify-center hover:bg-white z-10"
           >›</button>
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-10">
             {fotos.map((_, i) => (
-              <button key={i} onClick={() => setCurrent(i)}
+              <button key={i} onClick={(e) => { e.stopPropagation(); setCurrent(i); }}
                 className={"w-1.5 h-1.5 rounded-full transition " + (i === current ? "bg-white" : "bg-white/50")} />
             ))}
           </div>
         </>
       )}
     </div>
+  );
+}
+
+function Descripcion({ texto }) {
+  if (!texto) return null;
+  return (
+    <p className="text-slate-600 text-sm mt-1">
+      {texto.split("\n").map((linea, i) => (
+        <React.Fragment key={i}>
+          {linea}
+          {i < texto.split("\n").length - 1 && <br />}
+        </React.Fragment>
+      ))}
+    </p>
   );
 }
 
@@ -42,7 +54,7 @@ export function AdopcionesSupabase() {
     const el = trackRef.current;
     if (!el) return;
     const card = el.querySelector("[data-card]");
-    const delta = card ? card.getBoundingClientRect().width + 16 : 320;
+    const delta = card ? card.getBoundingClientRect().width + 16 : 296;
     el.scrollBy({ left: dir * delta, behavior: "smooth" });
   };
 
@@ -64,7 +76,7 @@ export function AdopcionesSupabase() {
         </ul>
         <p className="text-slate-600 mt-3">
           Cada rescatado viene de una historia distinta. Es fundamental brindar
-          paciencia, seguridad y cariño durante su adaptación.
+          paciencia, seguridad y cariño durante su adaptación. 
         </p>
         <br />
         <div className="mt-6 flex flex-wrap gap-3 justify-center">
@@ -82,27 +94,42 @@ export function AdopcionesSupabase() {
 
         {!loading && mascotas.length > 0 && (
           <>
-            <h3 className="text-[#38629F] text-xl font-semibold mt-10 mb-3">Mascotas en adopción</h3>
-            <div className="relative mt-2">
-              <button type="button"
-                className="absolute left-1 top-1/2 -translate-y-1/2 grid place-items-center w-9 h-9 rounded-full bg-white shadow hover:shadow-md border text-[#38629F] z-10"
-                aria-label="Anterior" onClick={() => scrollByCard(-1)}>«</button>
-              <div ref={trackRef} className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory px-1 scrollbar-hide relative">
+            <h3 className="text-[#38629F] text-xl font-semibold mt-10 mb-4">Mascotas en adopción</h3>
+
+            {/* Carrusel con botones externos */}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                className="shrink-0 grid place-items-center w-9 h-9 rounded-full bg-white shadow hover:shadow-md border border-slate-200 text-[#38629F]"
+                aria-label="Anterior"
+                onClick={() => scrollByCard(-1)}
+              >«</button>
+
+              <div
+                ref={trackRef}
+                className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory scrollbar-hide flex-1"
+              >
                 {mascotas.map((m) => (
-                  <article key={m.id} data-card
-                    className="min-w-[260px] max-w-[280px] snap-start bg-white rounded-2xl shadow hover:shadow-lg transition-shadow border border-slate-100">
+                  <article
+                    key={m.id}
+                    data-card
+                    className="shrink-0 w-[260px] snap-start bg-white rounded-2xl shadow hover:shadow-lg transition-shadow border border-slate-100"
+                  >
                     <PhotoCarousel fotos={urlsToArray(m)} alt={m.nombre} height="h-48" />
                     <div className="p-4">
                       <h3 className="text-[#38629F] font-semibold text-lg">{m.nombre}</h3>
-                      <p className="text-slate-600 text-sm mt-1">{m.descripcion}</p>
+                      <Descripcion texto={m.descripcion} />
                     </div>
                   </article>
                 ))}
-                <div className="pointer-events-none absolute right-0 top-0 h-full w-12 bg-gradient-to-l from-white to-transparent" />
               </div>
-              <button type="button"
-                className="absolute right-1 top-1/2 -translate-y-1/2 grid place-items-center w-9 h-9 rounded-full bg-white shadow hover:shadow-md border text-[#38629F] z-10"
-                aria-label="Siguiente" onClick={() => scrollByCard(1)}>»</button>
+
+              <button
+                type="button"
+                className="shrink-0 grid place-items-center w-9 h-9 rounded-full bg-white shadow hover:shadow-md border border-slate-200 text-[#38629F]"
+                aria-label="Siguiente"
+                onClick={() => scrollByCard(1)}
+              >»</button>
             </div>
           </>
         )}
@@ -121,7 +148,7 @@ export function TiendaSupabase() {
     const el = trackRef.current;
     if (!el) return;
     const card = el.querySelector("[data-card]");
-    const delta = card ? card.getBoundingClientRect().width + 16 : 280;
+    const delta = card ? card.getBoundingClientRect().width + 16 : 256;
     el.scrollBy({ left: dir * delta, behavior: "smooth" });
   };
 
@@ -149,9 +176,9 @@ export function TiendaSupabase() {
   return (
     <section id="tienda" className="py-16 bg-[#F7E9DC]">
       <div className="max-w-[1100px] mx-auto px-4">
-        <h2 className="text-2xl md:text-3xl font-semibold text-[#38629F] mb-6 text-center">🛍️ Tienda solidaria</h2>
+        <h2 className="text-2xl md:text-3xl font-semibold text-[#38629F] mb-6 text-center">Tienda solidaria</h2>
         <p className="text-slate-600 text-center mb-10">
-          Todo lo recaudado se destina a la atención veterinaria, alimento y cuidados de nuestros rescatados.
+          Todo lo recaudado se destina a la atención veterinaria, alimento y cuidados de nuestros rescatados. 
         </p>
 
         {loading ? (
@@ -161,13 +188,13 @@ export function TiendaSupabase() {
         ) : (
           <>
             {/* Carrusel mobile */}
-            <div className="relative md:hidden">
+            <div className="md:hidden flex items-center gap-2">
               <button type="button" onClick={() => scrollByCard(-1)}
-                className="absolute left-1 top-1/2 -translate-y-1/2 bg-white text-[#38629F] w-8 h-8 rounded-full shadow hover:shadow-md z-10">«</button>
-              <div ref={trackRef} className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory scrollbar-hide px-1">
+                className="shrink-0 bg-white text-[#38629F] w-8 h-8 rounded-full shadow hover:shadow-md border border-slate-200">«</button>
+              <div ref={trackRef} className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory scrollbar-hide flex-1">
                 {productos.map((item) => (
                   <article key={item.id} data-card
-                    className="min-w-[240px] max-w-[260px] snap-start bg-white rounded-2xl shadow hover:shadow-lg transition-shadow overflow-hidden flex flex-col">
+                    className="shrink-0 w-[240px] snap-start bg-white rounded-2xl shadow hover:shadow-lg transition-shadow overflow-hidden flex flex-col">
                     <PhotoCarousel fotos={urlsToArray(item)} alt={item.nombre} height="h-64" />
                     <div className="p-4 text-center">
                       <h3 className="text-[#38629F] font-semibold text-lg">{item.nombre}</h3>
@@ -180,7 +207,7 @@ export function TiendaSupabase() {
                 ))}
               </div>
               <button type="button" onClick={() => scrollByCard(1)}
-                className="absolute right-1 top-1/2 -translate-y-1/2 bg-white text-[#38629F] w-8 h-8 rounded-full shadow hover:shadow-md z-10">»</button>
+                className="shrink-0 bg-white text-[#38629F] w-8 h-8 rounded-full shadow hover:shadow-md border border-slate-200">»</button>
             </div>
 
             {/* Grid desktop */}
