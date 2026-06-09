@@ -198,7 +198,7 @@ export function TiendaSupabase() {
   const formatPrecio = (p) => p != null ? "$" + Number(p).toLocaleString("es-AR") : "";
 
   const ProductCard = ({ item }) => (
-    <article data-card className="shrink-0 w-[75vw] md:w-[280px] snap-start bg-white rounded-2xl shadow hover:shadow-lg transition-shadow overflow-hidden flex flex-col">
+    <article data-card className="shrink-0 w-[70vw] md:w-[280px] snap-start bg-white rounded-2xl shadow hover:shadow-lg transition-shadow overflow-hidden flex flex-col">
       <PhotoCarousel fotos={urlsToArray(item)} alt={item.nombre} height="h-64" />
       <div className="p-4 text-center">
         <h3 className="text-[#38629F] font-semibold text-lg">{item.nombre}</h3>
