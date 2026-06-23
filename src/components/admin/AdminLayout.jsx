@@ -5,6 +5,7 @@ const NAV = [
   { id: "mascotas", label: "Mascotas"},
   { id: "tienda", label: "Tienda" },
   { id: "estadisticas", label: "Estadísticas"},
+  { id: "noticias", label: "Noticias"},
 ];
 
 export default function AdminLayout({ children, activeTab, setActiveTab }) {

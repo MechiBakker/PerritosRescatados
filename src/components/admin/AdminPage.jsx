@@ -4,6 +4,7 @@ import AdminLayout from "./AdminLayout";
 import AdminMascotas from "./AdminMascotas";
 import AdminTienda from "./AdminTienda";
 import AdminEstadisticas from "./AdminEstadisticas";
+import AdminNoticias from "./AdminNoticias";
 
 function Login() {
   const { login } = useAuth();
@@ -108,6 +109,7 @@ export default function AdminPage() {
     mascotas: <AdminMascotas />,
     tienda: <AdminTienda />,
     estadisticas: <AdminEstadisticas />,
+    noticias: <AdminNoticias />,
   };
 
   return (

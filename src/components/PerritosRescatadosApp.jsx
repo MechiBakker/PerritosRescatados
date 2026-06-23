@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AdopcionesSupabase, TiendaSupabase } from "./SeccionesPublicas.jsx";
 import SeccionEstadisticas from "./SeccionEstadisticas.jsx";
+import SeccionNoticias from "./SeccionNoticias.jsx";
 
 /* ================= HEADER ================= */
 function Header() {
@@ -42,6 +43,7 @@ function Header() {
           <a className="hover:text-[#F7E9DC] transition-colors" href="#transitos">Tránsitos</a>
           <a className="hover:text-[#F7E9DC] transition-colors" href="#tienda">Tienda</a>
           <a className="hover:text-[#F7E9DC] transition-colors" href="#tienda">Nuestro impacto</a>
+          <a className="hover:text-[#F7E9DC] transition-colors" href="#noticias">Noticias</a>
           <a className="hover:text-[#F7E9DC] transition-colors" href="#colabora">Colaborá</a>
           <a
             href="/admin"
@@ -311,6 +313,7 @@ export default function PerritosRescatadosApp() {
         <Transitos />
         <TiendaSupabase />
         <SeccionEstadisticas />
+        <SeccionNoticias />
         <Colabora />
       </main>
 
